@@ -25,7 +25,7 @@ namespace ConsoleChatApp
             }
             catch (FieldAccessException ex)
             {
-                Console.WriteLine("Error with the users file\n\n" + ex.Message);
+                Console.WriteLine("Error with access to the users file\n\n" + ex.Message);
                 return new List<User>();
             }
         }
@@ -46,8 +46,28 @@ namespace ConsoleChatApp
             }
             catch (FieldAccessException ex)
             {
-                Console.WriteLine("Error with the users file\n\n" + ex.Message);
+                Console.WriteLine("Error with access to the messages file\n\n" + ex.Message);
                 return new List<Message>();
+            }
+        }
+
+        public static void ShowMessagesBetweenTwoUsers(User user1, User user2, List<Message> messages)
+        {
+            int idUser1 = user1.Id;
+            int idUser2 = user2.Id;
+
+            Console.WriteLine(String.Format("{0,-10}{1,60}\n", user1.DisplayName, user2.DisplayName));
+
+            foreach (Message message in messages)
+            {
+                if (message.IdSender == idUser1 && message.IdReceiver == idUser2)
+                {
+                    Console.WriteLine(String.Format("{0,70}", message.Text));
+                }
+                else if (message.IdSender == idUser2 && message.IdReceiver== idUser1)
+                {
+                    Console.WriteLine(message.Text);
+                }
             }
         }
 
@@ -55,6 +75,8 @@ namespace ConsoleChatApp
         {
             List<User> users = GetUsersFromJson();
             List<Message> messages = GetMessagesFromJson();
+
+            ShowMessagesBetweenTwoUsers(users[0], users[1], messages);
 
             return 0;
         }
