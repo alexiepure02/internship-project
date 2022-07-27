@@ -71,12 +71,36 @@ namespace ConsoleChatApp
             }
         }
 
+        public static User Login(List<User> users)
+        {
+            Console.Write("username: ");
+            string username = Console.ReadLine();
+            Console.Write("password: ");
+            string password = Console.ReadLine();
+
+            if (username == null)
+                username = "";
+            if (password == null)
+                password = "";
+
+            User? loggedUser = users.Find((user) => username == user.Username && password == user.Password);
+
+            if (loggedUser == null)
+            {
+                loggedUser = new User();
+                Console.WriteLine("User not found");
+            }
+            return loggedUser;
+        }
+
         static int Main(string[] args)
         {
             List<User> users = GetUsersFromJson();
             List<Message> messages = GetMessagesFromJson();
 
-            ShowMessagesBetweenTwoUsers(users[0], users[1], messages);
+            Console.WriteLine(Login(users).DisplayName);
+
+            // ShowMessagesBetweenTwoUsers(users[0], users[1], messages);
 
             return 0;
         }
