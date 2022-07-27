@@ -71,12 +71,12 @@ namespace ConsoleChatApp
             }
         }
 
-        public static User Login(List<User> users)
+        public static User? Login(List<User> users)
         {
             Console.Write("username: ");
-            string username = Console.ReadLine();
+            string? username = Console.ReadLine();
             Console.Write("password: ");
-            string password = Console.ReadLine();
+            string? password = Console.ReadLine();
 
             if (username == null)
                 username = "";
@@ -87,10 +87,95 @@ namespace ConsoleChatApp
 
             if (loggedUser == null)
             {
-                loggedUser = new User();
-                Console.WriteLine("User not found");
             }
             return loggedUser;
+        }
+
+        public static void LoginMenu(List<User> users, List<Message> messages)
+        {
+            User? loggedUser;
+
+            while (true)
+            {
+
+                loggedUser = Login(users);
+
+                if (loggedUser == null)
+                {
+                    Console.WriteLine("Error: User not found.");
+                    break;
+                }
+
+                users.Remove(loggedUser);
+
+                Console.Clear();
+
+                FriendsMenu(loggedUser, users, messages);
+            }
+        }
+
+        public static void FriendsMenu(User loggedUser, List<User> users, List<Message> messages)
+        {
+            int receiverIndex;
+            string? receiverIndexString;
+            
+            while (true)
+            {
+                Console.WriteLine("Friends:\n");
+
+                for (int i = 0; i < users.Count; i++)
+                {
+                    if (users[i] != loggedUser)
+                    {
+                        Console.WriteLine($"{i + 1}. {users[i].DisplayName}");
+                    }
+                }
+
+                Console.Write("\nPick someone to send a message to: ");
+                receiverIndexString = Console.ReadLine();
+
+                if (receiverIndexString == "back") break;
+
+                if (int.TryParse(receiverIndexString, out receiverIndex) == false)
+                {
+                    receiverIndex = -1;
+                }
+
+                Console.Clear();
+
+                Console.WriteLine(receiverIndex);
+
+                if (receiverIndex == -1 || receiverIndex > users.Count)
+                {
+                    Console.WriteLine($"Error: Choose a number between 1 and {users.Count}.\n");
+                }
+                else
+                {
+                    MessagesMenu(loggedUser, users[receiverIndex - 1], messages);
+                }
+            }
+        }
+        public static void MessagesMenu(User loggedUser, User Receiver, List<Message> messages)
+        {
+            string? message;
+
+            while (true)
+            {
+                ShowMessagesBetweenTwoUsers(loggedUser, Receiver, messages);
+
+                Console.Write("\n>: ");
+                message = Console.ReadLine();
+
+                Console.Clear();
+
+                if (message == "back") break;
+
+                if (!string.IsNullOrWhiteSpace(message))
+                {
+                    message = message.Trim();
+                    messages.Add(new Message() { IdSender = loggedUser.Id, IdReceiver = Receiver.Id, DateTime = DateTime.UtcNow.ToString(), Text = message });
+                }
+            }
         }
 
         static int Main(string[] args)
@@ -98,9 +183,7 @@ namespace ConsoleChatApp
             List<User> users = GetUsersFromJson();
             List<Message> messages = GetMessagesFromJson();
 
-            Console.WriteLine(Login(users).DisplayName);
-
-            // ShowMessagesBetweenTwoUsers(users[0], users[1], messages);
+            LoginMenu(users, messages);
 
             return 0;
         }
