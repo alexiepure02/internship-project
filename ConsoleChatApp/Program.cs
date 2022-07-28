@@ -100,9 +100,16 @@ namespace ConsoleChatApp
 
                 loggedUser = Login(users);
 
-                if (loggedUser == null)
+                try 
                 {
-                    Console.WriteLine("Error: User not found.");
+                    if (loggedUser == null)
+                    {
+                        throw new UserNotFoundException();
+                    }
+                }
+                catch (UserNotFoundException ex)
+                {
+                    Console.WriteLine(ex.Message);
                     break;
                 }
 
@@ -143,15 +150,17 @@ namespace ConsoleChatApp
 
                 Console.Clear();
 
-                Console.WriteLine(receiverIndex);
-
-                if (receiverIndex == -1 || receiverIndex > users.Count)
+                try
                 {
-                    Console.WriteLine($"Error: Choose a number between 1 and {users.Count}.\n");
-                }
-                else
-                {
+                    if (receiverIndex <= 0 || receiverIndex > users.Count)
+                    {
+                        throw new NumberBetweenException(users.Count);
+                    }
                     MessagesMenu(loggedUser, users[receiverIndex - 1], messages);
+                }
+                catch (NumberBetweenException ex)
+                {
+                    Console.WriteLine(ex.Message + "\n");
                 }
             }
         }
