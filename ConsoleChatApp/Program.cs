@@ -51,6 +51,26 @@ namespace ConsoleChatApp
             }
         }
 
+        public static void PutUsersIntoJson(List<User> users)
+        {
+            string jsonString = JsonSerializer.Serialize(users, new JsonSerializerOptions() { WriteIndented = true });
+
+            using (StreamWriter outputFile = new StreamWriter("../../../users.json"))
+            {
+                outputFile.WriteLine(jsonString);
+            }
+        }
+
+        public static void PutMessagesIntoJson(List<Message> messages)
+        {
+            string jsonString = JsonSerializer.Serialize(messages, new JsonSerializerOptions() { WriteIndented = true });
+
+            using (StreamWriter outputFile = new StreamWriter("../../../messages.json"))
+            {
+                outputFile.WriteLine(jsonString);
+            }
+        }
+
         public static void ShowMessagesBetweenTwoUsers(User user1, User user2, List<Message> messages)
         {
             int idUser1 = user1.Id;
@@ -100,7 +120,7 @@ namespace ConsoleChatApp
                     break;
                 }
 
-                users.Remove(loggedUser);       // this warning is bs
+                users.Remove(loggedUser);       // this warning is bs bcs if loggedUser is null, the catch clause catches it
 
                 Console.Clear();
 
@@ -238,6 +258,8 @@ namespace ConsoleChatApp
 
             LoginMenu(users, messages);
 
+            //PutUsersIntoJson(users);
+            PutMessagesIntoJson(messages);
             return 0;
         }
     }
