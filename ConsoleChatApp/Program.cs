@@ -69,6 +69,7 @@ namespace ConsoleChatApp
                     Console.WriteLine(message.Text);
                 }
             }
+            Console.Write("\n>: ");
         }
 
         public static User? Login(List<User> users)
@@ -78,17 +79,9 @@ namespace ConsoleChatApp
             Console.Write("password: ");
             string? password = Console.ReadLine();
 
-            if (username == null)
-                username = "";
-            if (password == null)
-                password = "";
-
             User? loggedUser = users.Find((user) => username == user.Username && password == user.Password);
 
-            if (loggedUser == null)
-            {
-            }
-            return loggedUser;
+            return loggedUser == null ? throw new UserNotFoundException() : loggedUser;
         }
 
         public static void LoginMenu(List<User> users, List<Message> messages)
@@ -97,15 +90,9 @@ namespace ConsoleChatApp
 
             while (true)
             {
-
-                loggedUser = Login(users);
-
-                try 
+                try
                 {
-                    if (loggedUser == null)
-                    {
-                        throw new UserNotFoundException();
-                    }
+                    loggedUser = Login(users);
                 }
                 catch (UserNotFoundException ex)
                 {
@@ -113,12 +100,47 @@ namespace ConsoleChatApp
                     break;
                 }
 
-                users.Remove(loggedUser);
+                users.Remove(loggedUser);       // this warning is bs
 
                 Console.Clear();
 
                 FriendsMenu(loggedUser, users, messages);
+
+                users.Add(loggedUser);
             }
+        }
+
+        public static void WriteFriendsMenu(User loggedUser, List<User> users)
+        {
+            Console.WriteLine("Friends:\n");
+
+            for (int i = 0; i < users.Count; i++)
+            {
+                if (users[i] != loggedUser)
+                {
+                    Console.WriteLine($"{i + 1}. {users[i].DisplayName}");
+                }
+            }
+            Console.Write("\nPick someone to send a message to: ");
+        }
+
+        public static int ConvertInputToInt(string? receiverIndexString)
+        {
+            int receiverIndex;
+            if (int.TryParse(receiverIndexString, out receiverIndex) == false)
+            {
+                return -1;
+            }
+            return receiverIndex;
+        }
+
+        public static bool CheckIfChoiceValid(int receiverIndex, int length)
+        {
+            if (receiverIndex <= 0 || receiverIndex > length)
+            {
+                throw new NumberBetweenException(length);
+            }
+            return true;            
         }
 
         public static void FriendsMenu(User loggedUser, List<User> users, List<Message> messages)
@@ -128,35 +150,21 @@ namespace ConsoleChatApp
             
             while (true)
             {
-                Console.WriteLine("Friends:\n");
+                WriteFriendsMenu(loggedUser, users);
 
-                for (int i = 0; i < users.Count; i++)
-                {
-                    if (users[i] != loggedUser)
-                    {
-                        Console.WriteLine($"{i + 1}. {users[i].DisplayName}");
-                    }
-                }
-
-                Console.Write("\nPick someone to send a message to: ");
                 receiverIndexString = Console.ReadLine();
-
-                if (receiverIndexString == "back") break;
-
-                if (int.TryParse(receiverIndexString, out receiverIndex) == false)
-                {
-                    receiverIndex = -1;
-                }
 
                 Console.Clear();
 
+                if (receiverIndexString == "back") break;
+
+                receiverIndex = ConvertInputToInt(receiverIndexString);
                 try
                 {
-                    if (receiverIndex <= 0 || receiverIndex > users.Count)
+                    if (CheckIfChoiceValid(receiverIndex, users.Count))
                     {
-                        throw new NumberBetweenException(users.Count);
+                        MessagesMenu(loggedUser, users[receiverIndex - 1], messages);
                     }
-                    MessagesMenu(loggedUser, users[receiverIndex - 1], messages);
                 }
                 catch (NumberBetweenException ex)
                 {
@@ -164,6 +172,38 @@ namespace ConsoleChatApp
                 }
             }
         }
+
+        public static bool ContainsProfanity(string message)
+        {
+            string[] profanity = new string[5] { "idiot", "dumb", "booger", "alligator", "monkey" };
+
+            foreach (string word in profanity)
+            {
+                if (message.Contains(word)) return true;
+            }
+            return false;
+        }
+
+        public static void CheckIfMessageValid(string? message)
+        {
+            if (message == null)
+            {
+                throw new InvalidMessageException("Please type a message to continue.");
+            }
+            else if (string.IsNullOrWhiteSpace(message))
+            {
+                throw new InvalidMessageException("Please type a message to continue.");
+            }
+            else if (message.Length > 256)
+            {
+                throw new InvalidMessageException("The message should have a maximum of 256 characters.");
+            }
+            else if (ContainsProfanity(message))
+            {
+                throw new InvalidMessageException("The message contains profanity.");
+            }
+        }
+
         public static void MessagesMenu(User loggedUser, User Receiver, List<Message> messages)
         {
             string? message;
@@ -172,17 +212,21 @@ namespace ConsoleChatApp
             {
                 ShowMessagesBetweenTwoUsers(loggedUser, Receiver, messages);
 
-                Console.Write("\n>: ");
                 message = Console.ReadLine();
 
                 Console.Clear();
 
                 if (message == "back") break;
 
-                if (!string.IsNullOrWhiteSpace(message))
+                try
                 {
-                    message = message.Trim();
+                    CheckIfMessageValid(message);
+
                     messages.Add(new Message() { IdSender = loggedUser.Id, IdReceiver = Receiver.Id, DateTime = DateTime.UtcNow.ToString(), Text = message });
+                }
+                catch (InvalidMessageException ex)
+                {
+                    Console.WriteLine(ex.Message);
                 }
             }
         }
