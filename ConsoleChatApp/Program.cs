@@ -81,7 +81,7 @@ namespace ConsoleChatApp
             int idUser1 = user1.Id;
             int idUser2 = user2.Id;
 
-            Console.WriteLine(String.Format("{0,-10}{1,60}\n", user1.DisplayName, user2.DisplayName));
+            Console.WriteLine($"{user2.DisplayName}:");
 
             foreach (Message message in messages)
             {
@@ -135,16 +135,18 @@ namespace ConsoleChatApp
             }
         }
 
+        public static User GetFriendOfUserById(int id, List<User> users)
+        {
+            return users.Find(user => user.Id == id);
+        }
+
         public static void WriteFriendsMenu(User loggedUser, List<User> users)
         {
             Console.WriteLine("Friends:\n");
 
-            for (int i = 0; i < users.Count; i++)
+            for (int i = 0; i < loggedUser.Friends.Count; i++)
             {
-                if (users[i] != loggedUser)
-                {
-                    Console.WriteLine($"{i + 1}. {users[i].DisplayName}");
-                }
+                Console.WriteLine($"{i + 1}. {GetFriendOfUserById(loggedUser.Friends[i], users).DisplayName}");
             }
             Console.Write("\nPick someone to send a message to: ");
         }
@@ -188,7 +190,7 @@ namespace ConsoleChatApp
                 {
                     if (CheckIfChoiceValid(receiverIndex, users.Count))
                     {
-                        MessagesMenu(loggedUser, users[receiverIndex - 1], messages);
+                        MessagesMenu(loggedUser, GetFriendOfUserById(loggedUser.Friends[receiverIndex - 1], users), messages);
                     }
                 }
                 catch (NumberBetweenException ex)
@@ -258,16 +260,6 @@ namespace ConsoleChatApp
             
             Dictionary<int, List<int>> friends = GetFriendsFromJson();
             AddFriendsToEachUser(friends, users);
-
-            /*foreach (var user in users)
-            {
-                Console.Write(user.DisplayName + ": ");
-                foreach (var friend in user.Friends)
-                {
-                    Console.Write(users.Find(user => user.Id == friend).DisplayName + " ");
-                }
-                Console.WriteLine();
-            }*/
             
             List<Message> messages = GetMessagesFromJson();
 
