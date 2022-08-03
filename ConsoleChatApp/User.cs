@@ -12,5 +12,6 @@ namespace ConsoleChatApp
         public string Password { get; set; }
         public string DisplayName { get; set; }
         public int Id { get; set; }
+        public List<int> Friends { get; set; }
     }
 }
