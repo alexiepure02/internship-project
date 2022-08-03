@@ -9,7 +9,7 @@ namespace ConsoleChatApp
 {
     internal class Program
     {
-        public static List<User> GetUsersFromJson()
+            public static List<User>? GetUsersFromJson()
         {
             List<User> users = new List<User>();
 
@@ -19,15 +19,7 @@ namespace ConsoleChatApp
                 users = JsonSerializer.Deserialize<List<User>>(json);
             }
 
-            try
-            {
             return users;
-            }
-            catch (FieldAccessException ex)
-            {
-                Console.WriteLine("Error with access to the users file\n\n" + ex.Message);
-                return new List<User>();
-            }
         }
 
         public static List<Message> GetMessagesFromJson()
@@ -40,15 +32,7 @@ namespace ConsoleChatApp
                 messages = JsonSerializer.Deserialize<List<Message>>(json);
             }
 
-            try
-            {
                 return messages;
-            }
-            catch (FieldAccessException ex)
-            {
-                Console.WriteLine("Error with access to the messages file\n\n" + ex.Message);
-                return new List<Message>();
-            }
         }
 
         public static void PutUsersIntoJson(List<User> users)
@@ -101,7 +85,7 @@ namespace ConsoleChatApp
 
             User? loggedUser = users.Find((user) => username == user.Username && password == user.Password);
 
-            return loggedUser == null ? throw new UserNotFoundException() : loggedUser;
+            return loggedUser == null ? throw new UserNotFoundException(username) : loggedUser;
         }
 
         public static void LoginMenu(List<User> users, List<Message> messages)
@@ -120,9 +104,9 @@ namespace ConsoleChatApp
                     break;
                 }
 
-                users.Remove(loggedUser);       // this warning is bs bcs if loggedUser is null, the catch clause catches it
-
                 Console.Clear();
+
+                users.Remove(loggedUser);       // this warning is bs bcs if loggedUser is null, the catch clause catches it
 
                 FriendsMenu(loggedUser, users, messages);
 
@@ -206,11 +190,7 @@ namespace ConsoleChatApp
 
         public static void CheckIfMessageValid(string? message)
         {
-            if (message == null)
-            {
-                throw new InvalidMessageException("Please type a message to continue.");
-            }
-            else if (string.IsNullOrWhiteSpace(message))
+            if (string.IsNullOrWhiteSpace(message))
             {
                 throw new InvalidMessageException("Please type a message to continue.");
             }

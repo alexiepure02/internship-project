@@ -8,7 +8,7 @@ namespace ConsoleChatApp
 {
     internal class UserNotFoundException : Exception
     {
-        public UserNotFoundException() : base("Error: User not found.")
+        public UserNotFoundException(string user) : base($"Error: User {user} not found.")
         {
         }
     }
