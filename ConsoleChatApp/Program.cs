@@ -9,7 +9,7 @@ namespace ConsoleChatApp
 {
     internal class Program
     {
-            public static List<User>? GetUsersFromJson()
+        public static List<User>? GetUsersFromJson()
         {
             List<User> users = new List<User>();
 
@@ -32,7 +32,28 @@ namespace ConsoleChatApp
                 messages = JsonSerializer.Deserialize<List<Message>>(json);
             }
 
-                return messages;
+            return messages;
+        }
+
+        public static Dictionary<int, List<int>> GetFriendsFromJson()
+        {
+            Dictionary<int, List<int>> friends = new Dictionary<int, List<int>>();
+
+            using (StreamReader r = new StreamReader("../../../friends.json"))
+            {
+                string json = r.ReadToEnd();
+                friends = JsonSerializer.Deserialize<Dictionary<int, List<int>>>(json);
+            }
+
+            return friends;
+        }
+
+        public static void AddFriendsToEachUser(Dictionary<int, List<int>> friends, List<User> users)
+        {
+            foreach (User user in users)
+            {
+                user.Friends = friends[user.Id];
+            }
         }
 
         public static void PutUsersIntoJson(List<User> users)
@@ -234,6 +255,20 @@ namespace ConsoleChatApp
         static int Main(string[] args)
         {
             List<User> users = GetUsersFromJson();
+            
+            Dictionary<int, List<int>> friends = GetFriendsFromJson();
+            AddFriendsToEachUser(friends, users);
+
+            /*foreach (var user in users)
+            {
+                Console.Write(user.DisplayName + ": ");
+                foreach (var friend in user.Friends)
+                {
+                    Console.Write(users.Find(user => user.Id == friend).DisplayName + " ");
+                }
+                Console.WriteLine();
+            }*/
+            
             List<Message> messages = GetMessagesFromJson();
 
             LoginMenu(users, messages);
