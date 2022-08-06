@@ -76,6 +76,22 @@ namespace ConsoleChatApp
             }
         }
 
+        public static void PutFriendsIntoJson(List<User> users)
+        {
+            Dictionary<int, List<int>> friends = new Dictionary<int, List<int>>();
+
+            foreach (User user in users)
+            {
+                friends.Add(user.Id, user.Friends);
+            }
+
+            string jsonString = JsonSerializer.Serialize(friends, new JsonSerializerOptions() { WriteIndented = true });
+
+            using (StreamWriter outputFile = new StreamWriter("../../../friends.json"))
+            {
+                outputFile.WriteLine(jsonString);
+            }
+        }
         public static void ShowMessagesBetweenTwoUsers(User user1, User user2, List<Message> messages)
         {
             int idUser1 = user1.Id;
@@ -127,9 +143,9 @@ namespace ConsoleChatApp
 
                 Console.Clear();
 
-                users.Remove(loggedUser);       // this warning is bs bcs if loggedUser is null, the catch clause catches it
+                users.Remove(loggedUser);
 
-                FriendsMenu(loggedUser, users, messages);
+                PreFriendsMenu(loggedUser, users, messages);
 
                 users.Add(loggedUser);
             }
@@ -138,6 +154,151 @@ namespace ConsoleChatApp
         public static User GetFriendOfUserById(int id, List<User> users)
         {
             return users.Find(user => user.Id == id);
+        }
+
+        public static int ConvertInputToInt(string? choiceString)
+        {
+            int receiverIndex;
+            if (int.TryParse(choiceString, out receiverIndex) == false)
+            {
+                return -1;
+            }
+            return receiverIndex;
+        }
+
+        public static bool CheckIfChoiceValid(int choice, int length)
+        {
+            if (choice <= 0 || choice > length)
+            {
+                throw new NumberBetweenException(length);
+            }
+            return true;            
+        }
+
+        public static void PreFriendsMenu(User loggedUser, List<User> users, List<Message> messages)
+        {
+            int choice;
+            string? choiceString;
+
+            while (true)
+            {
+
+                Console.WriteLine("1. Show friends");
+                Console.WriteLine("2. Add friend");
+                Console.WriteLine("3. Delete friend");
+                Console.WriteLine("4. Block friend");
+
+                Console.Write("\nPick your choice: ");
+
+                // can be made into a function
+
+                choiceString = Console.ReadLine();
+
+                Console.Clear();
+
+                if (choiceString == "back") break;
+
+                choice = ConvertInputToInt(choiceString);
+
+                // to here
+
+                try
+                {
+                    if (CheckIfChoiceValid(choice, 4))
+                    {
+
+                        // change to switch-case block
+
+                        if (choice == 1)
+                        {
+                            FriendsMenu(loggedUser, users, messages);
+                        }
+                        else if (choice == 2)
+                        {
+                            AddFriendMenu(loggedUser, users);
+                        }
+                        else if (choice == 3)
+                        {
+                            DeleteFriendMenu(loggedUser);
+                        }
+                        else if (choice == 4)
+                        {
+                            BlockFriendMenu(loggedUser);
+                        }
+                    }
+                }
+                catch (NumberBetweenException ex)
+                {
+                    Console.WriteLine(ex.Message + "\n");
+                }
+            }
+        }
+
+        private static void AddFriendMenu(User loggedUser, List<User> users)
+        {
+            int choice;
+            string? choiceString;
+
+            while (true)
+            {
+                Console.Write("Introduce the ID of the person you want to add: ");
+
+                choiceString = Console.ReadLine();
+
+                Console.Clear();
+
+                if (choiceString == "back") break;
+
+                choice = ConvertInputToInt(choiceString);
+
+                try
+                {
+
+                    // create Validate function
+
+                    if (loggedUser.Id == choice)
+                    {
+                        throw new Exception();
+                    }
+                    if (users.Find(user => user.Id == choice) == null)
+                    {
+                        throw new UserNotFoundException(choice);
+                    }
+                    if (loggedUser.Friends.Contains(choice))
+                    {
+                        throw new UserInFriendsException(choice);
+                    }
+                    // to here
+
+                    loggedUser.Friends.Add(choice);
+
+                    break;
+
+                }
+                catch (UserNotFoundException ex)
+                {
+                    Console.WriteLine(ex.Message + "\n");
+                }
+                catch (UserInFriendsException ex)
+                {
+                    Console.WriteLine(ex.Message + "\n");
+                }
+                catch
+                {
+                    // make this into a custom exception
+
+                    Console.WriteLine($"Error: {choice} is your ID.");
+                }
+            }
+        }
+
+        private static void DeleteFriendMenu(User loggedUser)
+        {
+            // to do
+        }
+        private static void BlockFriendMenu(User loggedUser)
+        {
+            // to do
         }
 
         public static void WriteFriendsMenu(User loggedUser, List<User> users)
@@ -151,46 +312,27 @@ namespace ConsoleChatApp
             Console.Write("\nPick someone to send a message to: ");
         }
 
-        public static int ConvertInputToInt(string? receiverIndexString)
-        {
-            int receiverIndex;
-            if (int.TryParse(receiverIndexString, out receiverIndex) == false)
-            {
-                return -1;
-            }
-            return receiverIndex;
-        }
-
-        public static bool CheckIfChoiceValid(int receiverIndex, int length)
-        {
-            if (receiverIndex <= 0 || receiverIndex > length)
-            {
-                throw new NumberBetweenException(length);
-            }
-            return true;            
-        }
-
         public static void FriendsMenu(User loggedUser, List<User> users, List<Message> messages)
         {
-            int receiverIndex;
-            string? receiverIndexString;
+            int choice;
+            string? choiceString;
             
             while (true)
             {
                 WriteFriendsMenu(loggedUser, users);
 
-                receiverIndexString = Console.ReadLine();
+                choiceString = Console.ReadLine();
 
                 Console.Clear();
 
-                if (receiverIndexString == "back") break;
+                if (choiceString == "back") break;
 
-                receiverIndex = ConvertInputToInt(receiverIndexString);
+                choice = ConvertInputToInt(choiceString);
                 try
                 {
-                    if (CheckIfChoiceValid(receiverIndex, users.Count))
+                    if (CheckIfChoiceValid(choice, users.Count))
                     {
-                        MessagesMenu(loggedUser, GetFriendOfUserById(loggedUser.Friends[receiverIndex - 1], users), messages);
+                        MessagesMenu(loggedUser, GetFriendOfUserById(loggedUser.Friends[choice - 1], users), messages);
                     }
                 }
                 catch (NumberBetweenException ex)
@@ -262,11 +404,12 @@ namespace ConsoleChatApp
             AddFriendsToEachUser(friends, users);
             
             List<Message> messages = GetMessagesFromJson();
-
+ 
             LoginMenu(users, messages);
 
             //PutUsersIntoJson(users);
             PutMessagesIntoJson(messages);
+            PutFriendsIntoJson(users);
             return 0;
         }
     }

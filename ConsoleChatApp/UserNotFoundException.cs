@@ -11,5 +11,8 @@ namespace ConsoleChatApp
         public UserNotFoundException(string user) : base($"Error: User {user} not found.")
         {
         }
+        public UserNotFoundException(int id) : base($"Error: User with the id {id} not found.")
+        {
+        }
     }
 }
