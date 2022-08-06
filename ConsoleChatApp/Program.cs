@@ -263,7 +263,7 @@ namespace ConsoleChatApp
                         }
                         else if (choice == 4)
                         {
-                            DeleteFriendMenu(loggedUser);
+                            DeleteFriendMenu(loggedUser, users);
                         }
                         else if (choice == 5)
                         {
@@ -380,7 +380,7 @@ namespace ConsoleChatApp
 
                     users.Find(user => user.Id == choice).FriendRequests.Add(loggedUser.Id);
 
-                    Console.WriteLine("Request sent successfully.");
+                    Console.WriteLine("Request sent successfully.\n");
                     break;
 
                 }
@@ -401,9 +401,65 @@ namespace ConsoleChatApp
             }
         }
 
-        private static void DeleteFriendMenu(User loggedUser)
+        private static void DeleteFriendMenu(User loggedUser, List<User> users)
         {
-            // to do
+            int choice;
+            string? choiceString;
+
+            while (true)
+            {
+
+                foreach (int id in loggedUser.Friends)
+                {
+                    Console.WriteLine($"{GetUserById(id, users).DisplayName} - {id}");
+                }
+
+                Console.Write("\nIntroduce the ID of the person you want to delete: ");
+
+                choiceString = Console.ReadLine();
+
+                Console.Clear();
+
+                if (choiceString == "back") break;
+
+                choice = ConvertInputToInt(choiceString);
+
+                try
+                {
+                    // create validation function for this
+
+                    if (loggedUser.Id == choice)
+                    {
+                        throw new Exception();
+                    }
+                    if (GetUserById(choice, users) == null)
+                    {
+                        throw new UserNotFoundException(choice);
+                    }
+
+                    // to here
+
+                    loggedUser.Friends.Remove(choice);
+                    users.Find(user => user.Id == choice).Friends.Remove(loggedUser.Id);
+                    Console.WriteLine("Friend removed successfully.\n");
+                    break;
+
+                }
+                catch (UserNotFoundException ex)
+                {
+                    Console.WriteLine(ex.Message + "\n");
+                }
+                catch (UserInFriendsException ex)
+                {
+                    Console.WriteLine(ex.Message + "\n");
+                }
+                catch
+                {
+                    // make this into a custom exception
+
+                    Console.WriteLine($"Error: {choice} is your ID.");
+                }
+            }
         }
         private static void BlockFriendMenu(User loggedUser)
         {
