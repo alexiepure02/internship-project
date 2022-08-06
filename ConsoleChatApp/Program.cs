@@ -234,6 +234,22 @@ namespace ConsoleChatApp
             }
         }
 
+        public static void ValidateFriendId(int id, User loggedUser, List<User> users)
+        {
+            if (loggedUser.Id == id)
+            {
+                throw new Exception();
+            }
+            if (users.Find(user => user.Id == id) == null)
+            {
+                throw new UserNotFoundException(id);
+            }
+            if (loggedUser.Friends.Contains(id))
+            {
+                throw new UserInFriendsException(id);
+            }
+        }
+
         private static void AddFriendMenu(User loggedUser, List<User> users)
         {
             int choice;
@@ -253,22 +269,7 @@ namespace ConsoleChatApp
 
                 try
                 {
-
-                    // create Validate function
-
-                    if (loggedUser.Id == choice)
-                    {
-                        throw new Exception();
-                    }
-                    if (users.Find(user => user.Id == choice) == null)
-                    {
-                        throw new UserNotFoundException(choice);
-                    }
-                    if (loggedUser.Friends.Contains(choice))
-                    {
-                        throw new UserInFriendsException(choice);
-                    }
-                    // to here
+                    ValidateFriendId(choice, loggedUser, users);
 
                     loggedUser.Friends.Add(choice);
 
