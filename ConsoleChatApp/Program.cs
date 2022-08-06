@@ -48,11 +48,32 @@ namespace ConsoleChatApp
             return friends;
         }
 
+        public static Dictionary<int, List<int>> GetFriendRequestsFromJson()
+        {
+            Dictionary<int, List<int>> friendRequests = new Dictionary<int, List<int>>();
+
+            using (StreamReader r = new StreamReader("../../../friendRequests.json"))
+            {
+                string json = r.ReadToEnd();
+                friendRequests = JsonSerializer.Deserialize<Dictionary<int, List<int>>>(json);
+            }
+
+            return friendRequests;
+        }
+
         public static void AddFriendsToEachUser(Dictionary<int, List<int>> friends, List<User> users)
         {
             foreach (User user in users)
             {
                 user.Friends = friends[user.Id];
+            }
+        }
+
+        public static void AddFriendRequestsToEachUser(Dictionary<int, List<int>> friendRequests, List<User> users)
+        {
+            foreach (User user in users)
+            {
+                user.FriendRequests = friendRequests[user.Id];
             }
         }
 
@@ -92,6 +113,24 @@ namespace ConsoleChatApp
                 outputFile.WriteLine(jsonString);
             }
         }
+
+        public static void PutFriendRequestsIntoJson(List<User> users)
+        {
+            Dictionary<int, List<int>> friendRequests = new Dictionary<int, List<int>>();
+
+            foreach (User user in users)
+            {
+                friendRequests.Add(user.Id, user.FriendRequests);
+            }
+
+            string jsonString = JsonSerializer.Serialize(friendRequests, new JsonSerializerOptions() { WriteIndented = true });
+
+            using (StreamWriter outputFile = new StreamWriter("../../../friendRequests.json"))
+            {
+                outputFile.WriteLine(jsonString);
+            }
+        }
+
         public static void ShowMessagesBetweenTwoUsers(User user1, User user2, List<Message> messages)
         {
             int idUser1 = user1.Id;
@@ -151,7 +190,7 @@ namespace ConsoleChatApp
             }
         }
 
-        public static User GetFriendOfUserById(int id, List<User> users)
+        public static User GetUserById(int id, List<User> users)
         {
             return users.Find(user => user.Id == id);
         }
@@ -184,9 +223,10 @@ namespace ConsoleChatApp
             {
 
                 Console.WriteLine("1. Show friends");
-                Console.WriteLine("2. Add friend");
-                Console.WriteLine("3. Delete friend");
-                Console.WriteLine("4. Block friend");
+                Console.WriteLine("2. Show friend requests");
+                Console.WriteLine("3. Add friend");
+                Console.WriteLine("4. Delete friend");
+                Console.WriteLine("5. Block friend");
 
                 Console.Write("\nPick your choice: ");
 
@@ -215,13 +255,17 @@ namespace ConsoleChatApp
                         }
                         else if (choice == 2)
                         {
-                            AddFriendMenu(loggedUser, users);
+                            FriendRequestsMenu(loggedUser, users);
                         }
                         else if (choice == 3)
                         {
-                            DeleteFriendMenu(loggedUser);
+                            AddFriendMenu(loggedUser, users);
                         }
                         else if (choice == 4)
+                        {
+                            DeleteFriendMenu(loggedUser);
+                        }
+                        else if (choice == 5)
                         {
                             BlockFriendMenu(loggedUser);
                         }
@@ -234,13 +278,76 @@ namespace ConsoleChatApp
             }
         }
 
+        public static void FriendRequestsMenu(User loggedUser, List<User> users)
+        {
+            int choice;
+            string? choiceString;
+            bool remove;
+
+            while (true)
+            {
+                foreach (int id in loggedUser.FriendRequests)
+                {
+                    Console.WriteLine($"{GetUserById(id, users).DisplayName} - {id}");
+                }
+
+                Console.Write("\nType ID of user to accept or -ID to decline: ");
+
+                choiceString = Console.ReadLine();
+
+                Console.Clear();
+
+                if (choiceString == "back") break;
+
+                if (choiceString[0] == '-')
+                {
+                    remove = true;
+                    choiceString = choiceString[1..];
+                }
+                else
+                {
+                    remove = false;
+                }
+                choice = ConvertInputToInt(choiceString);
+
+                try
+                {
+                    ValidateFriendId(choice, loggedUser, users);
+
+                    if (remove == false)
+                    {
+                        loggedUser.Friends.Add(choice);
+                        users.Find(user => user.Id == choice).Friends.Add(loggedUser.Id);
+                    }
+                    loggedUser.FriendRequests.Remove(choice);
+                    
+                    break;
+                }
+                catch (UserNotFoundException ex)
+                {
+                    Console.WriteLine(ex.Message + "\n");
+                }
+                catch (UserInFriendsException ex)
+                {
+                    Console.WriteLine(ex.Message + "\n");
+                }
+                catch
+                {
+                    // make this into a custom exception
+
+                    Console.WriteLine($"Error: {choice} is your ID.");
+                }
+            }
+
+        }
+
         public static void ValidateFriendId(int id, User loggedUser, List<User> users)
         {
             if (loggedUser.Id == id)
             {
                 throw new Exception();
             }
-            if (users.Find(user => user.Id == id) == null)
+            if (GetUserById(id, users) == null)
             {
                 throw new UserNotFoundException(id);
             }
@@ -271,8 +378,9 @@ namespace ConsoleChatApp
                 {
                     ValidateFriendId(choice, loggedUser, users);
 
-                    loggedUser.Friends.Add(choice);
+                    users.Find(user => user.Id == choice).FriendRequests.Add(loggedUser.Id);
 
+                    Console.WriteLine("Request sent successfully.");
                     break;
 
                 }
@@ -308,7 +416,7 @@ namespace ConsoleChatApp
 
             for (int i = 0; i < loggedUser.Friends.Count; i++)
             {
-                Console.WriteLine($"{i + 1}. {GetFriendOfUserById(loggedUser.Friends[i], users).DisplayName}");
+                Console.WriteLine($"{i + 1}. {GetUserById(loggedUser.Friends[i], users).DisplayName}");
             }
             Console.Write("\nPick someone to send a message to: ");
         }
@@ -333,7 +441,7 @@ namespace ConsoleChatApp
                 {
                     if (CheckIfChoiceValid(choice, users.Count))
                     {
-                        MessagesMenu(loggedUser, GetFriendOfUserById(loggedUser.Friends[choice - 1], users), messages);
+                        MessagesMenu(loggedUser, GetUserById(loggedUser.Friends[choice - 1], users), messages);
                     }
                 }
                 catch (NumberBetweenException ex)
@@ -403,7 +511,10 @@ namespace ConsoleChatApp
             
             Dictionary<int, List<int>> friends = GetFriendsFromJson();
             AddFriendsToEachUser(friends, users);
-            
+
+            Dictionary<int, List<int>> friendRequests = GetFriendRequestsFromJson();
+            AddFriendRequestsToEachUser(friendRequests, users);
+
             List<Message> messages = GetMessagesFromJson();
  
             LoginMenu(users, messages);
@@ -411,6 +522,7 @@ namespace ConsoleChatApp
             //PutUsersIntoJson(users);
             PutMessagesIntoJson(messages);
             PutFriendsIntoJson(users);
+            PutFriendRequestsIntoJson(users);
             return 0;
         }
     }
