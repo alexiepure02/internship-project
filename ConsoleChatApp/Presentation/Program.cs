@@ -11,7 +11,6 @@ namespace ConsoleChatApp.Presentation
 {
     internal class Program
     {
-
         public static T GetItemsFromJson<T>(string jsonName) where T : new()
         {
             T items = new T();
@@ -34,25 +33,12 @@ namespace ConsoleChatApp.Presentation
                 outputFile.WriteLine(jsonString);
             }
         }
-        public static void ShowMessagesBetweenTwoUsers(User user1, User user2, List<Message> messages)
+
+        public static User FindUser(string username, string password, List<User> users)
         {
-            int idUser1 = user1.Id;
-            int idUser2 = user2.Id;
+            User loggedUser = users.Find((user) => username == user.Username && password == user.Password);
 
-            Console.WriteLine($"{user2.DisplayName}:");
-
-            foreach (Message message in messages)
-            {
-                if (message.IdSender == idUser1 && message.IdReceiver == idUser2)
-                {
-                    Console.WriteLine(string.Format("{0,70}", message.Text));
-                }
-                else if (message.IdSender == idUser2 && message.IdReceiver == idUser1)
-                {
-                    Console.WriteLine(message.Text);
-                }
-            }
-            Console.Write("\n>: ");
+            return loggedUser == null ? throw new UserNotFoundException(username) : loggedUser;
         }
 
         public static User? Login(List<User> users)
@@ -62,9 +48,7 @@ namespace ConsoleChatApp.Presentation
             Console.Write("password: ");
             string? password = Console.ReadLine();
 
-            User? loggedUser = users.Find((user) => username == user.Username && password == user.Password);
-
-            return loggedUser == null ? throw new UserNotFoundException(username) : loggedUser;
+            return FindUser(username, password, users);
         }
 
         public static void LoginMenu(List<User> users, List<Message> messages)
@@ -117,6 +101,17 @@ namespace ConsoleChatApp.Presentation
             return true;
         }
 
+        public static void WritePreFriendsMenu()
+        {
+            Console.WriteLine("1. Show friends");
+            Console.WriteLine("2. Show friend requests");
+            Console.WriteLine("3. Add friend");
+            Console.WriteLine("4. Delete friend");
+            Console.WriteLine("5. Block friend");
+
+            Console.Write("\nPick your choice: ");
+        }
+
         public static void PreFriendsMenu(User loggedUser, List<User> users, List<Message> messages)
         {
             int choice;
@@ -124,16 +119,7 @@ namespace ConsoleChatApp.Presentation
 
             while (true)
             {
-
-                Console.WriteLine("1. Show friends");
-                Console.WriteLine("2. Show friend requests");
-                Console.WriteLine("3. Add friend");
-                Console.WriteLine("4. Delete friend");
-                Console.WriteLine("5. Block friend");
-
-                Console.Write("\nPick your choice: ");
-
-                // can be made into a function
+                WritePreFriendsMenu();
 
                 choiceString = Console.ReadLine();
 
@@ -143,34 +129,29 @@ namespace ConsoleChatApp.Presentation
 
                 choice = ConvertInputToInt(choiceString);
 
-                // to here
-
                 try
                 {
                     if (CheckIfChoiceValid(choice, 4))
                     {
-
-                        // change to switch-case block
-
-                        if (choice == 1)
+                        switch (choice)
                         {
-                            FriendsMenu(loggedUser, users, messages);
-                        }
-                        else if (choice == 2)
-                        {
-                            FriendRequestsMenu(loggedUser, users);
-                        }
-                        else if (choice == 3)
-                        {
-                            AddFriendMenu(loggedUser, users);
-                        }
-                        else if (choice == 4)
-                        {
-                            DeleteFriendMenu(loggedUser, users);
-                        }
-                        else if (choice == 5)
-                        {
-                            BlockFriendMenu(loggedUser);
+                            case 1:
+                                FriendsMenu(loggedUser, users, messages);
+                                break;
+                            case 2:
+                                FriendRequestsMenu(loggedUser, users);
+                                break;
+                            case 3:
+                                AddFriendMenu(loggedUser, users);
+                                break;
+                            case 4:
+                                DeleteFriendMenu(loggedUser, users);
+                                break;
+                            case 5:
+                                BlockFriendMenu(loggedUser);
+                                break;
+                            default:
+                                break;
                         }
                     }
                 }
@@ -181,74 +162,22 @@ namespace ConsoleChatApp.Presentation
             }
         }
 
-        public static void FriendRequestsMenu(User loggedUser, List<User> users)
+        public static bool CheckAcceptOrRemove(string choice)
         {
-            int choice;
-            string? choiceString;
-            bool remove;
+            return choice[0] == '-' ? true : false;
+        }
 
-            while (true)
-            {
-                foreach (int id in loggedUser.FriendRequests)
-                {
-                    Console.WriteLine($"{GetUserById(id, users).DisplayName} - {id}");
-                }
-
-                Console.Write("\nType ID of user to accept or -ID to decline: ");
-
-                choiceString = Console.ReadLine();
-
-                Console.Clear();
-
-                if (choiceString == "back") break;
-
-                if (choiceString[0] == '-')
-                {
-                    remove = true;
-                    choiceString = choiceString[1..];
-                }
-                else
-                {
-                    remove = false;
-                }
-                choice = ConvertInputToInt(choiceString);
-
-                try
-                {
-                    ValidateFriendId(choice, loggedUser, users);
-
-                    if (remove == false)
-                    {
-                        loggedUser.Friends.Add(choice);
-                        users.Find(user => user.Id == choice).Friends.Add(loggedUser.Id);
-                    }
-                    loggedUser.FriendRequests.Remove(choice);
-
-                    break;
-                }
-                catch (UserNotFoundException ex)
-                {
-                    Console.WriteLine(ex.Message + "\n");
-                }
-                catch (UserInFriendsException ex)
-                {
-                    Console.WriteLine(ex.Message + "\n");
-                }
-                catch
-                {
-                    // make this into a custom exception
-
-                    Console.WriteLine($"Error: {choice} is your ID.");
-                }
-            }
-
+        public static void AcceptFriendRequest(User loggedUser, int introducedId, List<User> users)
+        {
+            loggedUser.Friends.Add(introducedId);
+            users.Find(user => user.Id == introducedId).Friends.Add(loggedUser.Id);
         }
 
         public static void ValidateFriendId(int id, User loggedUser, List<User> users)
         {
             if (loggedUser.Id == id)
             {
-                throw new Exception();
+                throw new SameIdException(id);
             }
             if (GetUserById(id, users) == null)
             {
@@ -260,7 +189,62 @@ namespace ConsoleChatApp.Presentation
             }
         }
 
-        private static void AddFriendMenu(User loggedUser, List<User> users)
+        public static void WriteFriendRequestsMenu(User loggedUser, List<User> users)
+        {
+            foreach (int id in loggedUser.FriendRequests)
+            {
+                Console.WriteLine($"{GetUserById(id, users).DisplayName} - {id}");
+            }
+
+            Console.Write("\nType ID of user to accept or -ID to decline: ");
+        }
+
+        public static void FriendRequestsMenu(User loggedUser, List<User> users)
+        {
+            int choice;
+            string? choiceString;
+            bool remove;
+
+            while (true)
+            {
+                WriteFriendRequestsMenu(loggedUser, users);
+
+                choiceString = Console.ReadLine();
+
+                Console.Clear();
+
+                if (choiceString == "back") break;
+
+                remove = CheckAcceptOrRemove(choiceString);
+
+                if (remove) choiceString = choiceString[1..];
+
+                choice = ConvertInputToInt(choiceString);
+
+                try
+                {
+                    ValidateFriendId(choice, loggedUser, users);
+
+                    if (remove == false)
+                        AcceptFriendRequest(loggedUser, choice, users);
+
+                    loggedUser.FriendRequests.Remove(choice);
+
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message + "\n");
+                }
+            }
+        }
+
+        public static void SendFriendRequest(User loggedUser, int introducedId, List<User> users)
+        {
+            users.Find(user => user.Id == introducedId).FriendRequests.Add(loggedUser.Id);
+        }
+
+        public static void AddFriendMenu(User loggedUser, List<User> users)
         {
             int choice;
             string? choiceString;
@@ -280,31 +264,20 @@ namespace ConsoleChatApp.Presentation
                 try
                 {
                     ValidateFriendId(choice, loggedUser, users);
-
-                    users.Find(user => user.Id == choice).FriendRequests.Add(loggedUser.Id);
+                    SendFriendRequest(loggedUser, choice, users);
 
                     Console.WriteLine("Request sent successfully.\n");
                     break;
 
                 }
-                catch (UserNotFoundException ex)
+                catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message + "\n");
-                }
-                catch (UserInFriendsException ex)
-                {
-                    Console.WriteLine(ex.Message + "\n");
-                }
-                catch
-                {
-                    // make this into a custom exception
-
-                    Console.WriteLine($"Error: {choice} is your ID.");
                 }
             }
         }
 
-        private static void DeleteFriendMenu(User loggedUser, List<User> users)
+        public static void DeleteFriendMenu(User loggedUser, List<User> users)
         {
             int choice;
             string? choiceString;
@@ -348,23 +321,14 @@ namespace ConsoleChatApp.Presentation
                     break;
 
                 }
-                catch (UserNotFoundException ex)
+                catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message + "\n");
-                }
-                catch (UserInFriendsException ex)
-                {
-                    Console.WriteLine(ex.Message + "\n");
-                }
-                catch
-                {
-                    // make this into a custom exception
-
-                    Console.WriteLine($"Error: {choice} is your ID.");
                 }
             }
         }
-        private static void BlockFriendMenu(User loggedUser)
+        
+        public static void BlockFriendMenu(User loggedUser)
         {
             // to do
         }
@@ -410,7 +374,28 @@ namespace ConsoleChatApp.Presentation
             }
         }
 
-        public static bool ContainsProfanity(string message)
+        public static void WriteMessagesBetweenTwoUsers(User user1, User user2, List<Message> messages)
+        {
+            int idUser1 = user1.Id;
+            int idUser2 = user2.Id;
+
+            Console.WriteLine($"{user2.DisplayName}:");
+
+            foreach (Message message in messages)
+            {
+                if (message.IdSender == idUser1 && message.IdReceiver == idUser2)
+                {
+                    Console.WriteLine(string.Format("{0,70}", message.Text));
+                }
+                else if (message.IdSender == idUser2 && message.IdReceiver == idUser1)
+                {
+                    Console.WriteLine(message.Text);
+                }
+            }
+            Console.Write("\n>: ");
+        }
+
+        public static bool CheckProfanity(string message)
         {
             string[] profanity = new string[5] { "idiot", "dumb", "booger", "alligator", "monkey" };
 
@@ -431,10 +416,15 @@ namespace ConsoleChatApp.Presentation
             {
                 throw new InvalidMessageException("The message should have a maximum of 256 characters.");
             }
-            else if (ContainsProfanity(message))
+            else if (CheckProfanity(message))
             {
                 throw new InvalidMessageException("The message contains profanity.");
             }
+        }
+
+        public static void AddMessage(List<Message> messages, User loggedUser, User Receiver, string message)
+        {
+            messages.Add(new Message() { IdSender = loggedUser.Id, IdReceiver = Receiver.Id, DateTime = DateTime.UtcNow.ToString(), Text = message });
         }
 
         public static void MessagesMenu(User loggedUser, User Receiver, List<Message> messages)
@@ -443,7 +433,7 @@ namespace ConsoleChatApp.Presentation
 
             while (true)
             {
-                ShowMessagesBetweenTwoUsers(loggedUser, Receiver, messages);
+                WriteMessagesBetweenTwoUsers(loggedUser, Receiver, messages);
 
                 message = Console.ReadLine();
 
@@ -454,8 +444,7 @@ namespace ConsoleChatApp.Presentation
                 try
                 {
                     CheckIfMessageValid(message);
-
-                    messages.Add(new Message() { IdSender = loggedUser.Id, IdReceiver = Receiver.Id, DateTime = DateTime.UtcNow.ToString(), Text = message });
+                    AddMessage(messages, loggedUser, Receiver, message);
                 }
                 catch (InvalidMessageException ex)
                 {
@@ -463,12 +452,11 @@ namespace ConsoleChatApp.Presentation
                 }
             }
         }
-
+        
         static int Main(string[] args)
         {
 
             List<User> users = GetItemsFromJson<List<User>>("users");
-
             List<Message> messages = GetItemsFromJson<List<Message>>("messages");
 
             LoginMenu(users, messages);
