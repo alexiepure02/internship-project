@@ -25,79 +25,15 @@ namespace ConsoleChatApp.Presentation
             return items;
         }
 
-        public static void AddItemsToEachUser(Dictionary<int, List<int>> items, List<User> users, string propertyName)
+        public static void PutItemsIntoJson<T>(T items, string jsonName)
         {
-            if (propertyName == "friends")
-            {
-                foreach (User user in users)
-                {
-                    user.Friends = items[user.Id];
-                }
-            }
-            else if (propertyName == "friendRequests")
-            {
-                foreach (User user in users)
-                {
-                    user.FriendRequests = items[user.Id];
-                }
-            }
+            string jsonString = JsonSerializer.Serialize(items, new JsonSerializerOptions() { WriteIndented = true });
 
-        }
-
-        public static void PutUsersIntoJson(List<User> users)
-        {
-            string jsonString = JsonSerializer.Serialize(users, new JsonSerializerOptions() { WriteIndented = true });
-
-            using (StreamWriter outputFile = new StreamWriter("../../../Infrastructure/users.json"))
+            using (StreamWriter outputFile = new StreamWriter($"../../../Infrastructure/{jsonName}.json"))
             {
                 outputFile.WriteLine(jsonString);
             }
         }
-
-        public static void PutMessagesIntoJson(List<Message> messages)
-        {
-            string jsonString = JsonSerializer.Serialize(messages, new JsonSerializerOptions() { WriteIndented = true });
-
-            using (StreamWriter outputFile = new StreamWriter("../../../Infrastructure/messages.json"))
-            {
-                outputFile.WriteLine(jsonString);
-            }
-        }
-
-        public static void PutFriendsIntoJson(List<User> users)
-        {
-            Dictionary<int, List<int>> friends = new Dictionary<int, List<int>>();
-
-            foreach (User user in users)
-            {
-                friends.Add(user.Id, user.Friends);
-            }
-
-            string jsonString = JsonSerializer.Serialize(friends, new JsonSerializerOptions() { WriteIndented = true });
-
-            using (StreamWriter outputFile = new StreamWriter("../../../Infrastructure/friends.json"))
-            {
-                outputFile.WriteLine(jsonString);
-            }
-        }
-
-        public static void PutFriendRequestsIntoJson(List<User> users)
-        {
-            Dictionary<int, List<int>> friendRequests = new Dictionary<int, List<int>>();
-
-            foreach (User user in users)
-            {
-                friendRequests.Add(user.Id, user.FriendRequests);
-            }
-
-            string jsonString = JsonSerializer.Serialize(friendRequests, new JsonSerializerOptions() { WriteIndented = true });
-
-            using (StreamWriter outputFile = new StreamWriter("../../../Infrastructure/friendRequests.json"))
-            {
-                outputFile.WriteLine(jsonString);
-            }
-        }
-
         public static void ShowMessagesBetweenTwoUsers(User user1, User user2, List<Message> messages)
         {
             int idUser1 = user1.Id;
@@ -535,19 +471,11 @@ namespace ConsoleChatApp.Presentation
 
             List<Message> messages = GetItemsFromJson<List<Message>>("messages");
 
-            Dictionary<int, List<int>> friends = GetItemsFromJson<Dictionary<int, List<int>>>("friends");
-            AddItemsToEachUser(friends, users, "friends");
-
-            Dictionary<int, List<int>> friendRequests = GetItemsFromJson<Dictionary<int, List<int>>>("friendRequests");
-            AddItemsToEachUser(friendRequests, users, "friendRequests");
-
-
             LoginMenu(users, messages);
 
-            //PutUsersIntoJson(users);
-            PutMessagesIntoJson(messages);
-            PutFriendsIntoJson(users);
-            PutFriendRequestsIntoJson(users);
+            PutItemsIntoJson<List<User>>(users, "users");
+            PutItemsIntoJson<List<Message>>(messages, "messages");
+
             return 0;
         }
     }
