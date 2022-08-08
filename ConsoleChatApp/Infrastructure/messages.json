@@ -52,5 +52,17 @@
     "IdReceiver": 4685,
     "Text": "yep.",
     "DateTime": "8/3/2022 8:21:28 AM"
+  },
+  {
+    "IdSender": 1302,
+    "IdReceiver": 4685,
+    "Text": "still works?",
+    "DateTime": "8/8/2022 8:59:16 AM"
+  },
+  {
+    "IdSender": 4685,
+    "IdReceiver": 1302,
+    "Text": "yep.",
+    "DateTime": "8/8/2022 8:59:31 AM"
   }
 ]

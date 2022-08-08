@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ConsoleChatApp
+namespace ConsoleChatApp.Domain.Exceptions
 {
     internal class UserNotFoundException : Exception
     {

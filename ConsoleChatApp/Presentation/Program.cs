@@ -1,11 +1,13 @@
-﻿using System;
+﻿using ConsoleChatApp.Domain;
+using ConsoleChatApp.Domain.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 
-namespace ConsoleChatApp
+namespace ConsoleChatApp.Presentation
 {
     internal class Program
     {
@@ -13,7 +15,7 @@ namespace ConsoleChatApp
         {
             List<User> users = new List<User>();
 
-            using (StreamReader r = new StreamReader("../../../users.json"))
+            using (StreamReader r = new StreamReader("../../../Infrastructure/users.json"))
             {
                 string json = r.ReadToEnd();
                 users = JsonSerializer.Deserialize<List<User>>(json);
@@ -26,7 +28,7 @@ namespace ConsoleChatApp
         {
             List<Message> messages = new List<Message>();
 
-            using (StreamReader r = new StreamReader("../../../messages.json"))
+            using (StreamReader r = new StreamReader("../../../Infrastructure/messages.json"))
             {
                 string json = r.ReadToEnd();
                 messages = JsonSerializer.Deserialize<List<Message>>(json);
@@ -39,7 +41,7 @@ namespace ConsoleChatApp
         {
             Dictionary<int, List<int>> friends = new Dictionary<int, List<int>>();
 
-            using (StreamReader r = new StreamReader("../../../friends.json"))
+            using (StreamReader r = new StreamReader("../../../Infrastructure/friends.json"))
             {
                 string json = r.ReadToEnd();
                 friends = JsonSerializer.Deserialize<Dictionary<int, List<int>>>(json);
@@ -52,7 +54,7 @@ namespace ConsoleChatApp
         {
             Dictionary<int, List<int>> friendRequests = new Dictionary<int, List<int>>();
 
-            using (StreamReader r = new StreamReader("../../../friendRequests.json"))
+            using (StreamReader r = new StreamReader("../../../Infrastructure/friendRequests.json"))
             {
                 string json = r.ReadToEnd();
                 friendRequests = JsonSerializer.Deserialize<Dictionary<int, List<int>>>(json);
@@ -81,7 +83,7 @@ namespace ConsoleChatApp
         {
             string jsonString = JsonSerializer.Serialize(users, new JsonSerializerOptions() { WriteIndented = true });
 
-            using (StreamWriter outputFile = new StreamWriter("../../../users.json"))
+            using (StreamWriter outputFile = new StreamWriter("../../../Infrastructure/users.json"))
             {
                 outputFile.WriteLine(jsonString);
             }
@@ -91,7 +93,7 @@ namespace ConsoleChatApp
         {
             string jsonString = JsonSerializer.Serialize(messages, new JsonSerializerOptions() { WriteIndented = true });
 
-            using (StreamWriter outputFile = new StreamWriter("../../../messages.json"))
+            using (StreamWriter outputFile = new StreamWriter("../../../Infrastructure/messages.json"))
             {
                 outputFile.WriteLine(jsonString);
             }
@@ -108,7 +110,7 @@ namespace ConsoleChatApp
 
             string jsonString = JsonSerializer.Serialize(friends, new JsonSerializerOptions() { WriteIndented = true });
 
-            using (StreamWriter outputFile = new StreamWriter("../../../friends.json"))
+            using (StreamWriter outputFile = new StreamWriter("../../../Infrastructure/friends.json"))
             {
                 outputFile.WriteLine(jsonString);
             }
@@ -125,7 +127,7 @@ namespace ConsoleChatApp
 
             string jsonString = JsonSerializer.Serialize(friendRequests, new JsonSerializerOptions() { WriteIndented = true });
 
-            using (StreamWriter outputFile = new StreamWriter("../../../friendRequests.json"))
+            using (StreamWriter outputFile = new StreamWriter("../../../Infrastructure/friendRequests.json"))
             {
                 outputFile.WriteLine(jsonString);
             }
@@ -142,9 +144,9 @@ namespace ConsoleChatApp
             {
                 if (message.IdSender == idUser1 && message.IdReceiver == idUser2)
                 {
-                    Console.WriteLine(String.Format("{0,70}", message.Text));
+                    Console.WriteLine(string.Format("{0,70}", message.Text));
                 }
-                else if (message.IdSender == idUser2 && message.IdReceiver== idUser1)
+                else if (message.IdSender == idUser2 && message.IdReceiver == idUser1)
                 {
                     Console.WriteLine(message.Text);
                 }
@@ -211,7 +213,7 @@ namespace ConsoleChatApp
             {
                 throw new NumberBetweenException(length);
             }
-            return true;            
+            return true;
         }
 
         public static void PreFriendsMenu(User loggedUser, List<User> users, List<Message> messages)
@@ -320,7 +322,7 @@ namespace ConsoleChatApp
                         users.Find(user => user.Id == choice).Friends.Add(loggedUser.Id);
                     }
                     loggedUser.FriendRequests.Remove(choice);
-                    
+
                     break;
                 }
                 catch (UserNotFoundException ex)
@@ -481,7 +483,7 @@ namespace ConsoleChatApp
         {
             int choice;
             string? choiceString;
-            
+
             while (true)
             {
                 WriteFriendsMenu(loggedUser, users);
@@ -564,7 +566,7 @@ namespace ConsoleChatApp
         static int Main(string[] args)
         {
             List<User> users = GetUsersFromJson();
-            
+
             Dictionary<int, List<int>> friends = GetFriendsFromJson();
             AddFriendsToEachUser(friends, users);
 
@@ -572,7 +574,7 @@ namespace ConsoleChatApp
             AddFriendRequestsToEachUser(friendRequests, users);
 
             List<Message> messages = GetMessagesFromJson();
- 
+
             LoginMenu(users, messages);
 
             //PutUsersIntoJson(users);
