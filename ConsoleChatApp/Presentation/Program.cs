@@ -239,9 +239,16 @@ namespace ConsoleChatApp.Presentation
             }
         }
 
+        public static bool CheckIfFriendRequestExists(User loggedUser, User futureFriend)
+        {
+            return futureFriend.FriendRequests.Contains(loggedUser.Id);
+        }
         public static void SendFriendRequest(User loggedUser, int introducedId, List<User> users)
         {
-            users.Find(user => user.Id == introducedId).FriendRequests.Add(loggedUser.Id);
+            User futureFriend = users.Find(user => user.Id == introducedId);
+
+            if (!CheckIfFriendRequestExists(loggedUser, futureFriend))
+                futureFriend.FriendRequests.Add(loggedUser.Id);
         }
 
         public static void AddFriendMenu(User loggedUser, List<User> users)
