@@ -11,72 +11,37 @@ namespace ConsoleChatApp.Presentation
 {
     internal class Program
     {
-        public static List<User>? GetUsersFromJson()
-        {
-            List<User> users = new List<User>();
 
-            using (StreamReader r = new StreamReader("../../../Infrastructure/users.json"))
+        public static T GetItemsFromJson<T>(string jsonName) where T : new()
+        {
+            T items = new T();
+
+            using (StreamReader r = new StreamReader($"../../../Infrastructure/{jsonName}.json"))
             {
                 string json = r.ReadToEnd();
-                users = JsonSerializer.Deserialize<List<User>>(json);
+                items = JsonSerializer.Deserialize<T>(json);
             }
 
-            return users;
+            return items;
         }
 
-        public static List<Message> GetMessagesFromJson()
+        public static void AddItemsToEachUser(Dictionary<int, List<int>> items, List<User> users, string propertyName)
         {
-            List<Message> messages = new List<Message>();
-
-            using (StreamReader r = new StreamReader("../../../Infrastructure/messages.json"))
+            if (propertyName == "friends")
             {
-                string json = r.ReadToEnd();
-                messages = JsonSerializer.Deserialize<List<Message>>(json);
+                foreach (User user in users)
+                {
+                    user.Friends = items[user.Id];
+                }
+            }
+            else if (propertyName == "friendRequests")
+            {
+                foreach (User user in users)
+                {
+                    user.FriendRequests = items[user.Id];
+                }
             }
 
-            return messages;
-        }
-
-        public static Dictionary<int, List<int>> GetFriendsFromJson()
-        {
-            Dictionary<int, List<int>> friends = new Dictionary<int, List<int>>();
-
-            using (StreamReader r = new StreamReader("../../../Infrastructure/friends.json"))
-            {
-                string json = r.ReadToEnd();
-                friends = JsonSerializer.Deserialize<Dictionary<int, List<int>>>(json);
-            }
-
-            return friends;
-        }
-
-        public static Dictionary<int, List<int>> GetFriendRequestsFromJson()
-        {
-            Dictionary<int, List<int>> friendRequests = new Dictionary<int, List<int>>();
-
-            using (StreamReader r = new StreamReader("../../../Infrastructure/friendRequests.json"))
-            {
-                string json = r.ReadToEnd();
-                friendRequests = JsonSerializer.Deserialize<Dictionary<int, List<int>>>(json);
-            }
-
-            return friendRequests;
-        }
-
-        public static void AddFriendsToEachUser(Dictionary<int, List<int>> friends, List<User> users)
-        {
-            foreach (User user in users)
-            {
-                user.Friends = friends[user.Id];
-            }
-        }
-
-        public static void AddFriendRequestsToEachUser(Dictionary<int, List<int>> friendRequests, List<User> users)
-        {
-            foreach (User user in users)
-            {
-                user.FriendRequests = friendRequests[user.Id];
-            }
         }
 
         public static void PutUsersIntoJson(List<User> users)
@@ -565,15 +530,17 @@ namespace ConsoleChatApp.Presentation
 
         static int Main(string[] args)
         {
-            List<User> users = GetUsersFromJson();
 
-            Dictionary<int, List<int>> friends = GetFriendsFromJson();
-            AddFriendsToEachUser(friends, users);
+            List<User> users = GetItemsFromJson<List<User>>("users");
 
-            Dictionary<int, List<int>> friendRequests = GetFriendRequestsFromJson();
-            AddFriendRequestsToEachUser(friendRequests, users);
+            List<Message> messages = GetItemsFromJson<List<Message>>("messages");
 
-            List<Message> messages = GetMessagesFromJson();
+            Dictionary<int, List<int>> friends = GetItemsFromJson<Dictionary<int, List<int>>>("friends");
+            AddItemsToEachUser(friends, users, "friends");
+
+            Dictionary<int, List<int>> friendRequests = GetItemsFromJson<Dictionary<int, List<int>>>("friendRequests");
+            AddItemsToEachUser(friendRequests, users, "friendRequests");
+
 
             LoginMenu(users, messages);
 
