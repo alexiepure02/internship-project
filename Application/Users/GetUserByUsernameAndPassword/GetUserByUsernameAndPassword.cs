@@ -1,4 +1,4 @@
-﻿using ConsoleChatApp.Domain;
+﻿using Domain;
 using MediatR;
 using System;
 using System.Collections.Generic;

@@ -1,10 +1,5 @@
-﻿using ConsoleChatApp.Domain;
+﻿using Domain;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Users.GetUserByUsernameAndPassword
 {
@@ -17,9 +12,11 @@ namespace Application.Users.GetUserByUsernameAndPassword
             _userRepository = userRepository;
         }
 
-        public Task<User> Handle(GetUserByUsernameAndPassword request, CancellationToken cancellationToken)
+        public Task<User> Handle(GetUserByUsernameAndPassword userInfo, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var user = _userRepository.GetUserByUsernameAndPassword(userInfo.Username, userInfo.Password);
+
+            return Task.FromResult(user);
         }
     }
 }

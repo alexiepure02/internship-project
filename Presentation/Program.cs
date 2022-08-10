@@ -1,13 +1,17 @@
-﻿using ConsoleChatApp.Domain;
+﻿using Application;
+using Application.Users.GetUserByUsernameAndPassword;
+using Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
+using MediatR;
+// temporary
 using ConsoleChatApp.Domain.Exceptions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
+using ConsoleChatApp;
+using Domain;
+using System.Reflection;
+// to here
 
-namespace ConsoleChatApp.Presentation
+namespace Presentation
 {
     internal class Program
     {
@@ -203,7 +207,7 @@ namespace ConsoleChatApp.Presentation
         {
             int choice;
             string? choiceString;
-            bool remove;
+            bool removeFriendReq;
 
             while (true)
             {
@@ -215,9 +219,9 @@ namespace ConsoleChatApp.Presentation
 
                 if (choiceString == "back") break;
 
-                remove = CheckAcceptOrRemove(choiceString);
+                removeFriendReq = CheckAcceptOrRemove(choiceString);
 
-                if (remove) choiceString = choiceString[1..];
+                if (removeFriendReq) choiceString = choiceString[1..];
 
                 choice = ConvertInputToInt(choiceString);
 
@@ -225,7 +229,7 @@ namespace ConsoleChatApp.Presentation
                 {
                     ValidateFriendId(choice, loggedUser, users);
 
-                    if (remove == false)
+                    if (removeFriendReq == false)
                         AcceptFriendRequest(loggedUser, choice, users);
 
                     loggedUser.FriendRequests.Remove(choice);
@@ -469,14 +473,31 @@ namespace ConsoleChatApp.Presentation
         
         static int Main(string[] args)
         {
+            var assembly = AppDomain.CurrentDomain.Load("Application");
 
-            List<User> users = GetItemsFromJson<List<User>>("users");
+            var services = new ServiceCollection()
+                .AddScoped<IUserRepository, InMemoryUserRepository>()
+                .AddScoped<IMessageRepository, InMemoryMessageRepository>()
+                .AddMediatR(typeof(Program).GetTypeInfo().Assembly)
+                .BuildServiceProvider();
+
+            var mediator = services.GetRequiredService<Mediator>();
+
+           /* var user = mediator.Send(new GetUserByUsernameAndPassword
+            {
+                Username = "alexiepure",
+                Password = "1234"
+            });*/
+
+            //Console.WriteLine(user);
+
+           /* List<User> users = GetItemsFromJson<List<User>>("users");
             List<Message> messages = GetItemsFromJson<List<Message>>("messages");
 
             LoginMenu(users, messages);
 
             PutItemsIntoJson<List<User>>(users, "users");
-            PutItemsIntoJson<List<Message>>(messages, "messages");
+            PutItemsIntoJson<List<Message>>(messages, "messages");*/
 
             return 0;
         }
