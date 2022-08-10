@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace ConsoleChatApp
 {
-    internal class UserNotFoundException : Exception
+    internal class UserInFriendsException : Exception
     {
-        public UserNotFoundException() : base("Error: User not found.")
+        public UserInFriendsException(int id) : base($"Error: User with the id {id} is already a friend.")
         {
         }
     }

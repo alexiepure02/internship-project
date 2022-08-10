@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ConsoleChatApp
+namespace ConsoleChatApp.Domain
 {
     public class User
     {
@@ -12,5 +12,7 @@ namespace ConsoleChatApp
         public string Password { get; set; }
         public string DisplayName { get; set; }
         public int Id { get; set; }
+        public List<int> Friends { get; set; }
+        public List<int> FriendRequests { get; set; }
     }
 }
