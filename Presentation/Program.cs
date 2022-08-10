@@ -243,6 +243,7 @@ namespace ConsoleChatApp.Presentation
         {
             return futureFriend.FriendRequests.Contains(loggedUser.Id);
         }
+        
         public static void SendFriendRequest(User loggedUser, int introducedId, List<User> users)
         {
             User futureFriend = users.Find(user => user.Id == introducedId);
@@ -322,8 +323,14 @@ namespace ConsoleChatApp.Presentation
 
                     // to here
 
+
+                    // delete friend method
+
                     loggedUser.Friends.Remove(choice);
                     users.Find(user => user.Id == choice).Friends.Remove(loggedUser.Id);
+                    
+                    // to here
+                    
                     Console.WriteLine("Friend removed successfully.\n");
                     break;
 
@@ -413,7 +420,7 @@ namespace ConsoleChatApp.Presentation
             return false;
         }
 
-        public static void CheckIfMessageValid(string? message)
+        public static void CheckIfMessageValid(string message)
         {
             if (string.IsNullOrWhiteSpace(message))
             {

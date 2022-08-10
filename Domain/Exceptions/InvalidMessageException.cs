@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace ConsoleChatApp.Domain.Exceptions
 {
-    internal class SameIdException : Exception
+    public class InvalidMessageException : Exception
     {
-        public SameIdException(int id) : base($"Error: {id} is your ID.")
+        public InvalidMessageException(string? message) : base(message)
         {
         }
     }

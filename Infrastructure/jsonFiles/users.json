@@ -11,18 +11,6 @@
     "FriendRequests": []
   },
   {
-    "Username": "johnn",
-    "Password": "1234",
-    "DisplayName": "John",
-    "Id": 2014,
-    "Friends": [
-      1302
-    ],
-    "FriendRequests": [
-      4685
-    ]
-  },
-  {
     "Username": "andrei1",
     "Password": "1234",
     "DisplayName": "Andrei",
@@ -42,6 +30,16 @@
     "Friends": [
       1302,
       7890
+    ],
+    "FriendRequests": []
+  },
+  {
+    "Username": "johnn",
+    "Password": "1234",
+    "DisplayName": "John",
+    "Id": 2014,
+    "Friends": [
+      1302
     ],
     "FriendRequests": []
   }

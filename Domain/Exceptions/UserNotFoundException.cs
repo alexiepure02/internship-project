@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ConsoleChatApp.Domain.Exceptions
 {
-    internal class UserNotFoundException : Exception
+    public class UserNotFoundException : Exception
     {
         public UserNotFoundException(string user) : base($"Error: User {user} not found.")
         {

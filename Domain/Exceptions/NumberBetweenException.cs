@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace ConsoleChatApp
 {
-    internal class UserInFriendsException : Exception
+    public class NumberBetweenException : Exception
     {
-        public UserInFriendsException(int id) : base($"Error: User with the id {id} is already a friend.")
+        public NumberBetweenException(int n) : base($"Error: Choose a number between 1 and {n}.")
         {
         }
     }
