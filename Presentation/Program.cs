@@ -9,13 +9,17 @@ using System.Text.Json;
 using ConsoleChatApp;
 using Domain;
 using System.Reflection;
+using System.Net.NetworkInformation;
+using Application.Users.AddUsers;
+using Application.Messages.AddMessages;
+using Application.Messages.GetMessagesBetweenTwoUsers;
 // to here
 
 namespace Presentation
 {
-    internal class Program
+    public class Program
     {
-        public static T GetItemsFromJson<T>(string jsonName) where T : new()
+/*        public static T GetItemsFromJson<T>(string jsonName) where T : new()
         {
             T items = new T();
 
@@ -37,14 +41,14 @@ namespace Presentation
                 outputFile.WriteLine(jsonString);
             }
         }
-
-        public static User FindUser(string username, string password, List<User> users)
+*/
+ /*       public static User FindUser(string username, string password, List<User> users)
         {
             User loggedUser = users.Find((user) => username == user.Username && password == user.Password);
 
             return loggedUser == null ? throw new UserNotFoundException(username) : loggedUser;
         }
-
+*/
         public static User? Login(List<User> users)
         {
             Console.Write("username: ");
@@ -81,11 +85,11 @@ namespace Presentation
             }
         }
 
-        public static User GetUserById(int id, List<User> users)
+/*        public static User GetUserById(int id, List<User> users)
         {
             return users.Find(user => user.Id == id);
         }
-
+*/
         public static int ConvertInputToInt(string? choiceString)
         {
             int receiverIndex;
@@ -171,13 +175,13 @@ namespace Presentation
             return choice[0] == '-' ? true : false;
         }
 
-        public static void AcceptFriendRequest(User loggedUser, int introducedId, List<User> users)
+/*        public static void AcceptFriendRequest(User loggedUser, int introducedId, List<User> users)
         {
             loggedUser.Friends.Add(introducedId);
             users.Find(user => user.Id == introducedId).Friends.Add(loggedUser.Id);
         }
-
-        public static void ValidateFriendId(int id, User loggedUser, List<User> users)
+*/
+/*        public static void ValidateFriendId(int id, User loggedUser, List<User> users)
         {
             if (loggedUser.Id == id)
             {
@@ -192,7 +196,7 @@ namespace Presentation
                 throw new UserInFriendsException(id);
             }
         }
-
+*/
         public static void WriteFriendRequestsMenu(User loggedUser, List<User> users)
         {
             foreach (int id in loggedUser.FriendRequests)
@@ -243,19 +247,19 @@ namespace Presentation
             }
         }
 
-        public static bool CheckIfFriendRequestExists(User loggedUser, User futureFriend)
+/*        public static bool CheckIfFriendRequestExists(User loggedUser, User futureFriend)
         {
             return futureFriend.FriendRequests.Contains(loggedUser.Id);
         }
-        
-        public static void SendFriendRequest(User loggedUser, int introducedId, List<User> users)
+*/        
+/*        public static void SendFriendRequest(User loggedUser, int introducedId, List<User> users)
         {
             User futureFriend = users.Find(user => user.Id == introducedId);
 
             if (!CheckIfFriendRequestExists(loggedUser, futureFriend))
                 futureFriend.FriendRequests.Add(loggedUser.Id);
         }
-
+*/
         public static void AddFriendMenu(User loggedUser, List<User> users)
         {
             int choice;
@@ -392,6 +396,7 @@ namespace Presentation
             }
         }
 
+    // change this
         public static void WriteMessagesBetweenTwoUsers(User user1, User user2, List<Message> messages)
         {
             int idUser1 = user1.Id;
@@ -413,7 +418,7 @@ namespace Presentation
             Console.Write("\n>: ");
         }
 
-        public static bool CheckProfanity(string message)
+/*        public static bool CheckProfanity(string message)
         {
             string[] profanity = new string[5] { "idiot", "dumb", "booger", "alligator", "monkey" };
 
@@ -423,8 +428,8 @@ namespace Presentation
             }
             return false;
         }
-
-        public static void CheckIfMessageValid(string message)
+*/
+/*        public static void CheckIfMessageValid(string message)
         {
             if (string.IsNullOrWhiteSpace(message))
             {
@@ -439,12 +444,12 @@ namespace Presentation
                 throw new InvalidMessageException("The message contains profanity.");
             }
         }
-
-        public static void AddMessage(List<Message> messages, User loggedUser, User Receiver, string message)
+*/
+/*        public static void AddMessage(List<Message> messages, User loggedUser, User Receiver, string message)
         {
             messages.Add(new Message() { IdSender = loggedUser.Id, IdReceiver = Receiver.Id, DateTime = DateTime.UtcNow.ToString(), Text = message });
         }
-
+*/
         public static void MessagesMenu(User loggedUser, User Receiver, List<Message> messages)
         {
             string? message;
@@ -473,23 +478,46 @@ namespace Presentation
         
         static int Main(string[] args)
         {
-            var assembly = AppDomain.CurrentDomain.Load("Application");
+            List<User> users = ManageData.Instance.GetItemsFromJson<List<User>>("users");
+            List<Message> messages = ManageData.Instance.GetItemsFromJson<List<Message>>("messages");
 
             var services = new ServiceCollection()
                 .AddScoped<IUserRepository, InMemoryUserRepository>()
                 .AddScoped<IMessageRepository, InMemoryMessageRepository>()
-                .AddMediatR(typeof(Program).GetTypeInfo().Assembly)
+                .AddMediatR(typeof(IUserRepository))
                 .BuildServiceProvider();
 
-            var mediator = services.GetRequiredService<Mediator>();
+            var mediator = services.GetRequiredService<IMediator>();
 
-           /* var user = mediator.Send(new GetUserByUsernameAndPassword
+            mediator.Send(new AddUsers
+            {
+                Users = users
+            });
+
+            mediator.Send(new AddMessages
+            {
+                Messages = messages
+            });
+
+/*            var user1 = mediator.Send(new GetUserByUsernameAndPassword
             {
                 Username = "alexiepure",
                 Password = "1234"
+            });
+
+            var user2 = mediator.Send(new GetUserByUsernameAndPassword
+            {
+                Username = "andrei1",
+                Password = "1234"
+            });
+
+            var messagess = mediator.Send(new GetMessagesBetweenTwoUsers
+            {
+                IdSender = user1.Result.Id,
+                IdReceiver = user2.Result.Id
             });*/
 
-            //Console.WriteLine(user);
+            Console.WriteLine();
 
            /* List<User> users = GetItemsFromJson<List<User>>("users");
             List<Message> messages = GetItemsFromJson<List<Message>>("messages");

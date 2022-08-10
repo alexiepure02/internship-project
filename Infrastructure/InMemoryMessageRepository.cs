@@ -7,17 +7,27 @@ namespace Infrastructure
     public class InMemoryMessageRepository : IMessageRepository
     {
         private readonly List<Message> _messages = new();
-
-        public InMemoryMessageRepository(List<Message> messages)
+        
+        public void AddMessages(List<Message> messages)
         {
-            _messages = messages;
+            foreach (Message message in messages)
+            {
+                _messages.Add(message);
+            }
         }
 
         public List<Message> GetMessagesBetweenTwoUsers(int idSender, int idReceiver)
         {
             List<Message> newMessages;
 
-            newMessages = _messages.FindAll(message => message.IdSender == idSender && message.IdReceiver == idReceiver);
+            newMessages = _messages.FindAll(message => message.IdSender == idSender && message.IdReceiver == idReceiver ||
+            message.IdSender == idReceiver && message.IdReceiver == idSender);
+
+            /*foreach (var message in _messages)
+            {
+                Console.WriteLine(message);
+            }
+*/
 
             return newMessages;
         }

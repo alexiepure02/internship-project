@@ -9,9 +9,12 @@ namespace Infrastructure
     {
         private readonly List<User> _users = new();
 
-        public InMemoryUserRepository(List<User> users)
+        public void AddUsers(List<User> users)
         {
-            _users = users;
+            foreach (User user in users)
+            {
+                _users.Add(user);
+            }
         }
 
         public User GetUserByUsernameAndPassword(string username, string password)

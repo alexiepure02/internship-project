@@ -9,6 +9,8 @@ namespace Application
 {
     public interface IUserRepository
     {
+        void AddUsers(List<User> users);
+
         // this is find user function
         User GetUserByUsernameAndPassword(string username, string password);
         User GetUserById(int id);
