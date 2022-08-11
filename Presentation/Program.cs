@@ -4,92 +4,75 @@ using Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using MediatR;
 // temporary
-using ConsoleChatApp.Domain.Exceptions;
+using Domain.Exceptions;
 using System.Text.Json;
-using ConsoleChatApp;
 using Domain;
 using System.Reflection;
 using System.Net.NetworkInformation;
 using Application.Users.AddUsers;
+using Application.Users.AddUser;
 using Application.Messages.AddMessages;
 using Application.Messages.GetMessagesBetweenTwoUsers;
+using Application.Users.RemoveUser;
+using Application.Users.GetAllDisplayNames;
+using Application.Users.GetUserById;
+using Application.Users.ValidateIdFriend;
+using Application.Users.AcceptOrRemoveFriendRequest;
+using Application.Users.SendFriendRequest;
+using Application.Users.RemoveFriend;
+using Application.Users.GetUsersCount;
+using Application.Messages.CheckIfMessageValid;
+using Application.Messages.AddMessage;
 // to here
 
 namespace Presentation
 {
     public class Program
     {
-/*        public static T GetItemsFromJson<T>(string jsonName) where T : new()
-        {
-            T items = new T();
-
-            using (StreamReader r = new StreamReader($"../../../Infrastructure/{jsonName}.json"))
-            {
-                string json = r.ReadToEnd();
-                items = JsonSerializer.Deserialize<T>(json);
-            }
-
-            return items;
-        }
-
-        public static void PutItemsIntoJson<T>(T items, string jsonName)
-        {
-            string jsonString = JsonSerializer.Serialize(items, new JsonSerializerOptions() { WriteIndented = true });
-
-            using (StreamWriter outputFile = new StreamWriter($"../../../Infrastructure/{jsonName}.json"))
-            {
-                outputFile.WriteLine(jsonString);
-            }
-        }
-*/
- /*       public static User FindUser(string username, string password, List<User> users)
-        {
-            User loggedUser = users.Find((user) => username == user.Username && password == user.Password);
-
-            return loggedUser == null ? throw new UserNotFoundException(username) : loggedUser;
-        }
-*/
-        public static User? Login(List<User> users)
+        public static User Login(IMediator mediator)
         {
             Console.Write("username: ");
             string? username = Console.ReadLine();
             Console.Write("password: ");
             string? password = Console.ReadLine();
 
-            return FindUser(username, password, users);
+            User user = mediator.Send(new GetUserByUsernameAndPassword
+            {
+                Username = username,
+                Password = password
+            }).Result;
+
+            return user;
         }
 
-        public static void LoginMenu(List<User> users, List<Message> messages)
+        public static void LoginMenu(IMediator mediator)
         {
-            User? loggedUser;
+            User loggedUser;
 
             while (true)
             {
-                try
-                {
-                    loggedUser = Login(users);
-                }
-                catch (UserNotFoundException ex)
-                {
-                    Console.WriteLine(ex.Message);
-                    break;
-                }
+                loggedUser = Login(mediator);
+
+                // if the user doesn't exist, it returns new User() which has the displayName property == null
+                if (loggedUser.DisplayName == null) break;
 
                 Console.Clear();
 
-                users.Remove(loggedUser);
+                mediator.Send(new RemoveUser
+                {
+                    User = loggedUser
+                });
 
-                PreFriendsMenu(loggedUser, users, messages);
+                PreFriendsMenu(loggedUser, mediator);
 
-                users.Add(loggedUser);
+                mediator.Send(new AddUser
+                {
+                    User = loggedUser
+                });
             }
         }
 
-/*        public static User GetUserById(int id, List<User> users)
-        {
-            return users.Find(user => user.Id == id);
-        }
-*/
+        // commands
         public static int ConvertInputToInt(string? choiceString)
         {
             int receiverIndex;
@@ -100,15 +83,21 @@ namespace Presentation
             return receiverIndex;
         }
 
+        // commands
         public static bool CheckIfChoiceValid(int choice, int length)
         {
+            if (length == 0)
+            {
+                throw new NoFriendRequests
+            }
+
             if (choice <= 0 || choice > length)
             {
                 throw new NumberBetweenException(length);
             }
             return true;
         }
-
+       
         public static void WritePreFriendsMenu()
         {
             Console.WriteLine("1. Show friends");
@@ -120,7 +109,7 @@ namespace Presentation
             Console.Write("\nPick your choice: ");
         }
 
-        public static void PreFriendsMenu(User loggedUser, List<User> users, List<Message> messages)
+        public static void PreFriendsMenu(User loggedUser, IMediator mediator)
         {
             int choice;
             string? choiceString;
@@ -137,26 +126,27 @@ namespace Presentation
 
                 choice = ConvertInputToInt(choiceString);
 
+                // adapt after i create CheckIfChoiceValid command
                 try
                 {
-                    if (CheckIfChoiceValid(choice, 4))
+                    if (CheckIfChoiceValid(choice, 5))
                     {
                         switch (choice)
                         {
                             case 1:
-                                FriendsMenu(loggedUser, users, messages);
+                                FriendsMenu(loggedUser, mediator);
                                 break;
                             case 2:
-                                FriendRequestsMenu(loggedUser, users);
+                                FriendRequestsMenu(loggedUser, mediator);
                                 break;
                             case 3:
-                                AddFriendMenu(loggedUser, users);
+                                AddFriendMenu(loggedUser, mediator);
                                 break;
                             case 4:
-                                DeleteFriendMenu(loggedUser, users);
+                                DeleteFriendMenu(loggedUser, mediator);
                                 break;
                             case 5:
-                                BlockFriendMenu(loggedUser);
+                                BlockFriendMenu(loggedUser, mediator);
                                 break;
                             default:
                                 break;
@@ -170,44 +160,25 @@ namespace Presentation
             }
         }
 
+        // commands
         public static bool CheckAcceptOrRemove(string choice)
         {
+            if (choice == "") return false;
             return choice[0] == '-' ? true : false;
         }
 
-/*        public static void AcceptFriendRequest(User loggedUser, int introducedId, List<User> users)
-        {
-            loggedUser.Friends.Add(introducedId);
-            users.Find(user => user.Id == introducedId).Friends.Add(loggedUser.Id);
-        }
-*/
-/*        public static void ValidateFriendId(int id, User loggedUser, List<User> users)
-        {
-            if (loggedUser.Id == id)
-            {
-                throw new SameIdException(id);
-            }
-            if (GetUserById(id, users) == null)
-            {
-                throw new UserNotFoundException(id);
-            }
-            if (loggedUser.Friends.Contains(id))
-            {
-                throw new UserInFriendsException(id);
-            }
-        }
-*/
-        public static void WriteFriendRequestsMenu(User loggedUser, List<User> users)
+        public static void WriteFriendRequestsMenu(User loggedUser, IMediator mediator)
         {
             foreach (int id in loggedUser.FriendRequests)
             {
-                Console.WriteLine($"{GetUserById(id, users).DisplayName} - {id}");
+                string displayName = mediator.Send(new GetUserById { Id = id}).Result.DisplayName;
+                Console.WriteLine($"{displayName} - {id}");
             }
 
             Console.Write("\nType ID of user to accept or -ID to decline: ");
         }
 
-        public static void FriendRequestsMenu(User loggedUser, List<User> users)
+        public static void FriendRequestsMenu(User loggedUser, IMediator mediator)
         {
             int choice;
             string? choiceString;
@@ -215,7 +186,7 @@ namespace Presentation
 
             while (true)
             {
-                WriteFriendRequestsMenu(loggedUser, users);
+                WriteFriendRequestsMenu(loggedUser, mediator);
 
                 choiceString = Console.ReadLine();
 
@@ -231,19 +202,34 @@ namespace Presentation
 
                 try
                 {
-                    ValidateFriendId(choice, loggedUser, users);
+                    CheckIfChoiceValid(choice, loggedUser.FriendRequests.Count);
+                    mediator.Send(new ValidateIdFriend
+                    {
+                        LoggedUser = loggedUser,
+                        idFriend = choice
+                    });
 
-                    if (removeFriendReq == false)
-                        AcceptFriendRequest(loggedUser, choice, users);
-
-                    loggedUser.FriendRequests.Remove(choice);
-
-                    break;
+                    mediator.Send(new AcceptOrRemoveFriendRequest
+                    {
+                        LoggedUser = loggedUser,
+                        idFriend = choice,
+                        removeFriendRequest = removeFriendReq
+                    });
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message + "\n");
                 }
+
+                /*try
+                {*/
+
+                // break;
+                /*}
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message + "\n");
+                }*/
             }
         }
 
@@ -260,7 +246,8 @@ namespace Presentation
                 futureFriend.FriendRequests.Add(loggedUser.Id);
         }
 */
-        public static void AddFriendMenu(User loggedUser, List<User> users)
+
+        public static void AddFriendMenu(User loggedUser, IMediator mediator)
         {
             int choice;
             string? choiceString;
@@ -279,8 +266,18 @@ namespace Presentation
 
                 try
                 {
-                    ValidateFriendId(choice, loggedUser, users);
-                    SendFriendRequest(loggedUser, choice, users);
+                    mediator.Send(new ValidateIdFriend
+                    {
+                        LoggedUser = loggedUser,
+                        idFriend = choice
+                    });
+                    //ValidateFriendId(choice, loggedUser, users);
+
+                    mediator.Send(new SendFriendRequest
+                    {
+                        LoggedUser = loggedUser,
+                        idFriend = choice
+                    });
 
                     Console.WriteLine("Request sent successfully.\n");
                     break;
@@ -293,7 +290,19 @@ namespace Presentation
             }
         }
 
-        public static void DeleteFriendMenu(User loggedUser, List<User> users)
+        public static void WriteDeleteFriendsMenu(User loggedUser, IMediator mediator)
+        {
+            foreach (int id in loggedUser.Friends)
+            {
+                string displayName = mediator.Send(new GetUserById { Id = id }).Result.DisplayName;
+
+                Console.WriteLine($"{displayName} - {id}");
+            }
+
+            Console.Write("\nIntroduce the ID of the person you want to delete: ");
+        }
+
+        public static void DeleteFriendMenu(User loggedUser, IMediator mediator)
         {
             int choice;
             string? choiceString;
@@ -301,13 +310,8 @@ namespace Presentation
             while (true)
             {
 
-                foreach (int id in loggedUser.Friends)
-                {
-                    Console.WriteLine($"{GetUserById(id, users).DisplayName} - {id}");
-                }
-
-                Console.Write("\nIntroduce the ID of the person you want to delete: ");
-
+                WriteDeleteFriendsMenu(loggedUser, mediator);
+                
                 choiceString = Console.ReadLine();
 
                 Console.Clear();
@@ -322,22 +326,20 @@ namespace Presentation
 
                     if (loggedUser.Id == choice)
                     {
-                        throw new Exception();
+                        throw new SameIdException(choice);
                     }
-                    if (GetUserById(choice, users) == null)
+                    if (mediator.Send(new GetUserById { Id = choice }).Result == null)
                     {
                         throw new UserNotFoundException(choice);
                     }
 
                     // to here
 
-
-                    // delete friend method
-
-                    loggedUser.Friends.Remove(choice);
-                    users.Find(user => user.Id == choice).Friends.Remove(loggedUser.Id);
-                    
-                    // to here
+                    mediator.Send(new RemoveFriend
+                    {
+                        LoggedUser = loggedUser,
+                        IdFriend = choice
+                    });
                     
                     Console.WriteLine("Friend removed successfully.\n");
                     break;
@@ -350,30 +352,32 @@ namespace Presentation
             }
         }
         
-        public static void BlockFriendMenu(User loggedUser)
+        public static void BlockFriendMenu(User loggedUser, IMediator mediator)
         {
             // to do
         }
 
-        public static void WriteFriendsMenu(User loggedUser, List<User> users)
+        public static void WriteFriendsMenu(User loggedUser, IMediator mediator)
         {
             Console.WriteLine("Friends:\n");
 
             for (int i = 0; i < loggedUser.Friends.Count; i++)
             {
-                Console.WriteLine($"{i + 1}. {GetUserById(loggedUser.Friends[i], users).DisplayName}");
+                string displayName = mediator.Send(new GetUserById { Id = loggedUser.Friends[i] }).Result.DisplayName;
+
+                Console.WriteLine($"{i + 1}. {displayName}");
             }
             Console.Write("\nPick someone to send a message to: ");
         }
 
-        public static void FriendsMenu(User loggedUser, List<User> users, List<Message> messages)
+        public static void FriendsMenu(User loggedUser, IMediator mediator)
         {
             int choice;
             string? choiceString;
 
             while (true)
             {
-                WriteFriendsMenu(loggedUser, users);
+                WriteFriendsMenu(loggedUser, mediator);
 
                 choiceString = Console.ReadLine();
 
@@ -384,9 +388,12 @@ namespace Presentation
                 choice = ConvertInputToInt(choiceString);
                 try
                 {
-                    if (CheckIfChoiceValid(choice, users.Count))
+                    int numberOfFriends = loggedUser.Friends.Count;
+
+                    if (CheckIfChoiceValid(choice, numberOfFriends))
                     {
-                        MessagesMenu(loggedUser, GetUserById(loggedUser.Friends[choice - 1], users), messages);
+                        User friend = mediator.Send(new GetUserById { Id = loggedUser.Friends[choice - 1] }).Result;
+                        MessagesMenu(loggedUser, friend, mediator);
                     }
                 }
                 catch (NumberBetweenException ex)
@@ -418,64 +425,44 @@ namespace Presentation
             Console.Write("\n>: ");
         }
 
-/*        public static bool CheckProfanity(string message)
+        public static void MessagesMenu(User loggedUser, User friend, IMediator mediator)
         {
-            string[] profanity = new string[5] { "idiot", "dumb", "booger", "alligator", "monkey" };
-
-            foreach (string word in profanity)
-            {
-                if (message.Contains(word)) return true;
-            }
-            return false;
-        }
-*/
-/*        public static void CheckIfMessageValid(string message)
-        {
-            if (string.IsNullOrWhiteSpace(message))
-            {
-                throw new InvalidMessageException("Please type a message to continue.");
-            }
-            else if (message.Length > 256)
-            {
-                throw new InvalidMessageException("The message should have a maximum of 256 characters.");
-            }
-            else if (CheckProfanity(message))
-            {
-                throw new InvalidMessageException("The message contains profanity.");
-            }
-        }
-*/
-/*        public static void AddMessage(List<Message> messages, User loggedUser, User Receiver, string message)
-        {
-            messages.Add(new Message() { IdSender = loggedUser.Id, IdReceiver = Receiver.Id, DateTime = DateTime.UtcNow.ToString(), Text = message });
-        }
-*/
-        public static void MessagesMenu(User loggedUser, User Receiver, List<Message> messages)
-        {
-            string? message;
+            string? sentMessage;
 
             while (true)
             {
-                WriteMessagesBetweenTwoUsers(loggedUser, Receiver, messages);
+                List<Message> messages = mediator.Send(new GetMessagesBetweenTwoUsers
+                {
+                    IdSender = loggedUser.Id,
+                    IdReceiver = friend.Id
+                }).Result;
 
-                message = Console.ReadLine();
+                WriteMessagesBetweenTwoUsers(loggedUser, friend, messages);
+
+                sentMessage = Console.ReadLine();
 
                 Console.Clear();
 
-                if (message == "back") break;
+                if (sentMessage == "back") break;
 
                 try
                 {
-                    CheckIfMessageValid(message);
-                    AddMessage(messages, loggedUser, Receiver, message);
+                    mediator.Send(new CheckIfMessageValid { Message = sentMessage });
+                    mediator.Send(new AddMessage
+                    {
+                        IdSender = loggedUser.Id,
+                        IdReceiver = friend.Id,
+                        Message = sentMessage
+                    });
+/*                    CheckIfMessageValid(sentMessage);
+                    AddMessage(messages, loggedUser, friend, sentMessage);*/
                 }
                 catch (InvalidMessageException ex)
                 {
                     Console.WriteLine(ex.Message);
                 }
             }
-        }
-        
+        }      
         static int Main(string[] args)
         {
             List<User> users = ManageData.Instance.GetItemsFromJson<List<User>>("users");
@@ -498,6 +485,9 @@ namespace Presentation
             {
                 Messages = messages
             });
+            
+            LoginMenu(mediator);
+
 
 /*            var user1 = mediator.Send(new GetUserByUsernameAndPassword
             {
@@ -517,12 +507,9 @@ namespace Presentation
                 IdReceiver = user2.Result.Id
             });*/
 
-            Console.WriteLine();
-
            /* List<User> users = GetItemsFromJson<List<User>>("users");
             List<Message> messages = GetItemsFromJson<List<Message>>("messages");
 
-            LoginMenu(users, messages);
 
             PutItemsIntoJson<List<User>>(users, "users");
             PutItemsIntoJson<List<Message>>(messages, "messages");*/
