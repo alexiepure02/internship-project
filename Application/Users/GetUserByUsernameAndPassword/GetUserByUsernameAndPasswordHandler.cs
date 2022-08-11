@@ -1,4 +1,5 @@
 ﻿using Domain;
+using Domain.Exceptions;
 using MediatR;
 
 namespace Application.Users.GetUserByUsernameAndPassword
@@ -14,9 +15,17 @@ namespace Application.Users.GetUserByUsernameAndPassword
 
         public Task<User> Handle(GetUserByUsernameAndPassword userInfo, CancellationToken cancellationToken)
         {
-            var user = _userRepository.GetUserByUsernameAndPassword(userInfo.Username, userInfo.Password);
+            try
+            {
+                var user = _userRepository.GetUserByUsernameAndPassword(userInfo.Username, userInfo.Password);
+                return Task.FromResult(user);
+            }
+            catch (UserNotFoundException ex)
+            {
+                Console.WriteLine(ex.Message);
+                return Task.FromResult(new User());
+            }
 
-            return Task.FromResult(user);
         }
     }
 }

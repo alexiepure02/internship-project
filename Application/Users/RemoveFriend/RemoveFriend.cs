@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Users.DeleteFriend
+namespace Application.Users.RemoveFriend
 {
-    public class DeleteFriend : IRequest
+    public class RemoveFriend : IRequest
     {
         public User LoggedUser { get; set; }
         public int IdFriend { get; set; }

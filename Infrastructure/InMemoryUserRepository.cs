@@ -16,6 +16,40 @@ namespace Infrastructure
             }
         }
 
+        public void AddUser(User user)
+        {
+            _users.Add(user);
+        }
+
+        public void RemoveUser(User user)
+        {
+            _users.Remove(user);
+        }
+
+        public List<string> GetAllDisplayNames()
+        {
+            List<string> displayNames = new();
+
+            foreach (User user in _users)
+            {
+                displayNames.Add(user.DisplayName);
+            }
+
+            return displayNames;
+        }
+
+        public List<int> GetAllIds()
+        {
+            List<int> ids = new();
+
+            foreach (User user in _users)
+            {
+                ids.Add(user.Id);
+            }
+
+            return ids;
+        }
+
         public User GetUserByUsernameAndPassword(string username, string password)
         {
             User loggedUser = _users.Find((user) => username == user.Username && password == user.Password);
@@ -69,10 +103,15 @@ namespace Infrastructure
 
         }
 
-        public void DeleteFriend(User loggedUser, int idFriend)
+        public void RemoveFriend(User loggedUser, int idFriend)
         {
             loggedUser.Friends.Remove(idFriend);
             _users.Find(user => user.Id == idFriend).Friends.Remove(loggedUser.Id);
+        }
+
+        public int GetUsersCount()
+        {
+            return _users.Count;
         }
     }
 }

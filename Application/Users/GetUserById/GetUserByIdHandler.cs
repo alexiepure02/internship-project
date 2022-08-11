@@ -19,9 +19,9 @@ namespace Application.Users.GetUserById
 
         public Task<User> Handle(GetUserById id, CancellationToken cancellationToken)
         {
-            var userId = _userRepository.GetUserById(id.Id);
+            var user = _userRepository.GetUserById(id.Id);
 
-            return Task.FromResult(userId);
+            return Task.FromResult(user);
         }
     }
 }
