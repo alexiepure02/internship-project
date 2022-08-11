@@ -1,7 +1,6 @@
 ﻿using Application;
-using ConsoleChatApp;
-using ConsoleChatApp.Domain.Exceptions;
 using Domain;
+using Domain.Exceptions;
 
 namespace Infrastructure
 {

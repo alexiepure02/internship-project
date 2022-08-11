@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ConsoleChatApp.Domain.Exceptions
+namespace Domain.Exceptions
 {
     public class InvalidMessageException : Exception
     {

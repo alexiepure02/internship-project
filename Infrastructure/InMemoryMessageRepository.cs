@@ -1,5 +1,5 @@
 ﻿using Application;
-using ConsoleChatApp.Domain.Exceptions;
+using Domain.Exceptions;
 using Domain;
 
 namespace Infrastructure

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ConsoleChatApp
+namespace Domain.Exceptions
 {
     public class UserInFriendsException : Exception
     {
