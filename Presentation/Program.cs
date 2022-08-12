@@ -36,13 +36,20 @@ namespace Presentation
             Console.Write("password: ");
             string? password = Console.ReadLine();
 
-            User user = mediator.Send(new GetUserByUsernameAndPassword
+            try
             {
-                Username = username,
-                Password = password
-            }).Result;
+                User user = mediator.Send(new GetUserByUsernameAndPassword
+                {
+                    Username = username,
+                    Password = password
+                }).Result;
 
-            return user;
+                return user;
+            }
+            catch
+            {
+                throw;
+            }
         }
 
         public static void LoginMenu(IMediator mediator)
@@ -51,24 +58,29 @@ namespace Presentation
 
             while (true)
             {
-                loggedUser = Login(mediator);
-
-                // if the user doesn't exist, it returns new User() which has the displayName property == null
-                if (loggedUser.DisplayName == null) break;
-
-                Console.Clear();
-
-                mediator.Send(new RemoveUser
+                try
                 {
-                    User = loggedUser
-                });
+                    loggedUser = Login(mediator);
 
-                PreFriendsMenu(loggedUser, mediator);
+                    Console.Clear();
 
-                mediator.Send(new AddUser
+                    mediator.Send(new RemoveUser
+                    {
+                        User = loggedUser
+                    });
+
+                    PreFriendsMenu(loggedUser, mediator);
+
+                    mediator.Send(new AddUser
+                    {
+                        User = loggedUser
+                    });
+                }
+                catch (AggregateException ex)
                 {
-                    User = loggedUser
-                });
+                    Console.WriteLine(ex.InnerException.Message);
+                    break;
+                }
             }
         }
 
@@ -86,11 +98,6 @@ namespace Presentation
         // commands
         public static bool CheckIfChoiceValid(int choice, int length)
         {
-            if (length == 0)
-            {
-                throw new NoFriendRequests
-            }
-
             if (choice <= 0 || choice > length)
             {
                 throw new NumberBetweenException(length);

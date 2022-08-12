@@ -22,8 +22,7 @@ namespace Application.Users.GetUserByUsernameAndPassword
             }
             catch (UserNotFoundException ex)
             {
-                Console.WriteLine(ex.Message);
-                return Task.FromResult(new User());
+                return Task.FromException<User>(ex);
             }
 
         }
