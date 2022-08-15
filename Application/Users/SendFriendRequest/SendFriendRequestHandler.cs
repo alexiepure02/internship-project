@@ -18,7 +18,14 @@ namespace Application.Users.SendFriendRequest
 
         public Task<Unit> Handle(SendFriendRequest users, CancellationToken cancellationToken)
         {
-            _userRepository.SendFriendRequest(users.LoggedUser, users.idFriend);
+            try
+            {
+                _userRepository.SendFriendRequest(users.LoggedUser, users.idFriend);
+            }
+            catch
+            {
+                throw;
+            }
 
             return Task.FromResult(Unit.Value);
         }

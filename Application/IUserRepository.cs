@@ -23,5 +23,6 @@ namespace Application
         void SendFriendRequest(User loggedUser, int idFriend);
         void RemoveFriend(User loggedUser, int idFriend);
         int GetUsersCount();
+        List<User> GetUsers();
     }
 }

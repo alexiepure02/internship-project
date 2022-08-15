@@ -61,5 +61,10 @@ namespace Infrastructure
             _messages.Add(new Message() { IdSender = idSender, IdReceiver = idReceiver, DateTime = DateTime.UtcNow.ToString(), Text = message });
 
         }
+
+        public List<Message> GetMessages()
+        {
+            return _messages;
+        }
     }
 }

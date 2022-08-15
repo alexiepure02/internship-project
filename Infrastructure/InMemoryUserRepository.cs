@@ -84,7 +84,6 @@ namespace Infrastructure
             }
             if (loggedUser.Friends.Contains(idFriend))
             {
-                // for some reason, it doesn't see the exception unless I do using ConsoleChatApp;
                 throw new UserInFriendsException(idFriend);
             }
         }
@@ -97,6 +96,8 @@ namespace Infrastructure
         public void SendFriendRequest(User loggedUser, int idFutureFriend)
         {
             User futureFriend = _users.Find(user => user.Id == idFutureFriend);
+
+            if (futureFriend == null) throw new UserNotFoundException(idFutureFriend);
 
             if (!CheckIfFriendRequestExists(loggedUser, futureFriend))
                 futureFriend.FriendRequests.Add(loggedUser.Id);
@@ -112,6 +113,11 @@ namespace Infrastructure
         public int GetUsersCount()
         {
             return _users.Count;
+        }
+
+        public List<User> GetUsers()
+        {
+            return _users;
         }
     }
 }

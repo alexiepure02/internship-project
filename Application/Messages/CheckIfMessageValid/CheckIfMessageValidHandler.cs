@@ -18,7 +18,14 @@ namespace Application.Messages.CheckIfMessageValid
 
         public Task<Unit> Handle(CheckIfMessageValid message, CancellationToken cancellationToken)
         {
-            _messageRepository.CheckIfMessageValid(message.Message);
+            try
+            {
+                _messageRepository.CheckIfMessageValid(message.Message);
+            }
+            catch(Exception ex)
+            {
+                return Task.FromException<Unit>(ex);
+            }
 
             return Task.FromResult(Unit.Value);
         }

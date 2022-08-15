@@ -9,5 +9,6 @@ namespace Application
         bool CheckProfanity(string message);
         void CheckIfMessageValid(string message);
         void AddMessage(int idSender, int idReceiver, string message);
+        List<Message> GetMessages();
     }
 }

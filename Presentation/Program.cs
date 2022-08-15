@@ -23,6 +23,8 @@ using Application.Users.RemoveFriend;
 using Application.Users.GetUsersCount;
 using Application.Messages.CheckIfMessageValid;
 using Application.Messages.AddMessage;
+using Application.Messages.GetMessages;
+using Application.Users.GetUsers;
 // to here
 
 namespace Presentation
@@ -84,8 +86,7 @@ namespace Presentation
             }
         }
 
-        // commands
-        public static int ConvertInputToInt(string? choiceString)
+        public static int ConvertInputToInt(string choiceString)
         {
             int receiverIndex;
             if (int.TryParse(choiceString, out receiverIndex) == false)
@@ -95,7 +96,6 @@ namespace Presentation
             return receiverIndex;
         }
 
-        // commands
         public static bool CheckIfChoiceValid(int choice, int length)
         {
             if (choice <= 0 || choice > length)
@@ -133,7 +133,6 @@ namespace Presentation
 
                 choice = ConvertInputToInt(choiceString);
 
-                // adapt after i create CheckIfChoiceValid command
                 try
                 {
                     if (CheckIfChoiceValid(choice, 5))
@@ -167,7 +166,6 @@ namespace Presentation
             }
         }
 
-        // commands
         public static bool CheckAcceptOrRemove(string choice)
         {
             if (choice == "") return false;
@@ -209,12 +207,13 @@ namespace Presentation
 
                 try
                 {
-                    CheckIfChoiceValid(choice, loggedUser.FriendRequests.Count);
-                    mediator.Send(new ValidateIdFriend
+                    Task<Unit> command = mediator.Send(new ValidateIdFriend
                     {
                         LoggedUser = loggedUser,
                         idFriend = choice
                     });
+
+                    if (command.IsFaulted) throw command.Exception;
 
                     mediator.Send(new AcceptOrRemoveFriendRequest
                     {
@@ -222,37 +221,24 @@ namespace Presentation
                         idFriend = choice,
                         removeFriendRequest = removeFriendReq
                     });
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message + "\n");
-                }
 
-                /*try
-                {*/
-
-                // break;
-                /*}
-                catch (Exception ex)
+                    if (removeFriendReq == true)
+                    {
+                        Console.WriteLine("Request removed succesfully.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Request accepted succesfully.");
+                    }
+                    Console.WriteLine();
+                    break;
+                }
+                catch (AggregateException ex)
                 {
-                    Console.WriteLine(ex.Message + "\n");
-                }*/
+                    Console.WriteLine(ex.InnerException.Message + "\n");
+                }
             }
         }
-
-/*        public static bool CheckIfFriendRequestExists(User loggedUser, User futureFriend)
-        {
-            return futureFriend.FriendRequests.Contains(loggedUser.Id);
-        }
-*/        
-/*        public static void SendFriendRequest(User loggedUser, int introducedId, List<User> users)
-        {
-            User futureFriend = users.Find(user => user.Id == introducedId);
-
-            if (!CheckIfFriendRequestExists(loggedUser, futureFriend))
-                futureFriend.FriendRequests.Add(loggedUser.Id);
-        }
-*/
 
         public static void AddFriendMenu(User loggedUser, IMediator mediator)
         {
@@ -273,12 +259,13 @@ namespace Presentation
 
                 try
                 {
-                    mediator.Send(new ValidateIdFriend
+                    Task<Unit> command = mediator.Send(new ValidateIdFriend
                     {
                         LoggedUser = loggedUser,
                         idFriend = choice
                     });
-                    //ValidateFriendId(choice, loggedUser, users);
+
+                    if (command.IsFaulted) throw command.Exception;
 
                     mediator.Send(new SendFriendRequest
                     {
@@ -290,10 +277,22 @@ namespace Presentation
                     break;
 
                 }
-                catch (Exception ex)
+                catch (AggregateException ex)
                 {
-                    Console.WriteLine(ex.Message + "\n");
+                    Console.WriteLine(ex.InnerException.Message + "\n");
                 }
+            }
+        }
+
+        public static void ValidateDeleteFriendId(User loggedUser, int choice, IMediator mediator)
+        {
+            if (loggedUser.Id == choice)
+            {
+                throw new SameIdException(choice);
+            }
+            if (mediator.Send(new GetUserById { Id = choice }).Result == null)
+            {
+                throw new UserNotFoundException(choice);
             }
         }
 
@@ -329,18 +328,7 @@ namespace Presentation
 
                 try
                 {
-                    // create validation function for this
-
-                    if (loggedUser.Id == choice)
-                    {
-                        throw new SameIdException(choice);
-                    }
-                    if (mediator.Send(new GetUserById { Id = choice }).Result == null)
-                    {
-                        throw new UserNotFoundException(choice);
-                    }
-
-                    // to here
+                    ValidateDeleteFriendId(loggedUser, choice, mediator);
 
                     mediator.Send(new RemoveFriend
                     {
@@ -454,22 +442,27 @@ namespace Presentation
 
                 try
                 {
-                    mediator.Send(new CheckIfMessageValid { Message = sentMessage });
+                    Task<MediatR.Unit> command = mediator.Send(new CheckIfMessageValid { Message = sentMessage });
+
+                    if (command.IsFaulted) throw command.Exception;
+                    
                     mediator.Send(new AddMessage
                     {
                         IdSender = loggedUser.Id,
                         IdReceiver = friend.Id,
                         Message = sentMessage
                     });
-/*                    CheckIfMessageValid(sentMessage);
-                    AddMessage(messages, loggedUser, friend, sentMessage);*/
                 }
-                catch (InvalidMessageException ex)
+                catch (AggregateException ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    Console.WriteLine(ex.InnerException.Message + "/n");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message + "\n");
                 }
             }
-        }      
+        }
         static int Main(string[] args)
         {
             List<User> users = ManageData.Instance.GetItemsFromJson<List<User>>("users");
@@ -495,31 +488,11 @@ namespace Presentation
             
             LoginMenu(mediator);
 
+            users = mediator.Send(new GetUsers()).Result;
+            messages = mediator.Send(new GetMessages()).Result;
 
-/*            var user1 = mediator.Send(new GetUserByUsernameAndPassword
-            {
-                Username = "alexiepure",
-                Password = "1234"
-            });
-
-            var user2 = mediator.Send(new GetUserByUsernameAndPassword
-            {
-                Username = "andrei1",
-                Password = "1234"
-            });
-
-            var messagess = mediator.Send(new GetMessagesBetweenTwoUsers
-            {
-                IdSender = user1.Result.Id,
-                IdReceiver = user2.Result.Id
-            });*/
-
-           /* List<User> users = GetItemsFromJson<List<User>>("users");
-            List<Message> messages = GetItemsFromJson<List<Message>>("messages");
-
-
-            PutItemsIntoJson<List<User>>(users, "users");
-            PutItemsIntoJson<List<Message>>(messages, "messages");*/
+            ManageData.Instance.PutItemsIntoJson<List<User>>(users, "users");
+            ManageData.Instance.PutItemsIntoJson<List<Message>>(messages, "messages");
 
             return 0;
         }

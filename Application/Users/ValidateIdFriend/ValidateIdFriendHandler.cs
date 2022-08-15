@@ -24,7 +24,7 @@ namespace Application.Users.ValidateIdFriend
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message + "\n");
+                return Task.FromException<Unit>(ex);
             }
 
             return Task.FromResult(Unit.Value);
