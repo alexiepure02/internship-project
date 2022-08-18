@@ -3,7 +3,6 @@ using Application.Users.GetUserByUsernameAndPassword;
 using Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using MediatR;
-// temporary
 using Domain.Exceptions;
 using System.Text.Json;
 using Domain;
@@ -17,7 +16,7 @@ using Application.Users.RemoveUser;
 using Application.Users.GetAllDisplayNames;
 using Application.Users.GetUserById;
 using Application.Users.ValidateIdFriend;
-using Application.Users.AcceptOrRemoveFriendRequest;
+using Application.Users.UpdateFriendRequest;
 using Application.Users.SendFriendRequest;
 using Application.Users.RemoveFriend;
 using Application.Users.GetUsersCount;
@@ -25,7 +24,6 @@ using Application.Messages.CheckIfMessageValid;
 using Application.Messages.AddMessage;
 using Application.Messages.GetMessages;
 using Application.Users.GetUsers;
-// to here
 
 namespace Presentation
 {
@@ -38,20 +36,16 @@ namespace Presentation
             Console.Write("password: ");
             string? password = Console.ReadLine();
 
-            try
-            {
                 User user = mediator.Send(new GetUserByUsernameAndPassword
                 {
                     Username = username,
                     Password = password
                 }).Result;
 
-                return user;
-            }
-            catch
-            {
-                throw;
-            }
+            // i have to check for null here because, if i check it in LoginMenu,
+            // i lose the typed username, so i have to throw the exception here
+
+            return user == null ? throw new UserNotFoundException(username) : user;
         }
 
         public static void LoginMenu(IMediator mediator)
@@ -78,9 +72,9 @@ namespace Presentation
                         User = loggedUser
                     });
                 }
-                catch (AggregateException ex)
+                catch (UserNotFoundException ex)
                 {
-                    Console.WriteLine(ex.InnerException.Message);
+                    Console.WriteLine(ex.Message);
                     break;
                 }
             }
@@ -169,7 +163,7 @@ namespace Presentation
         public static bool CheckAcceptOrRemove(string choice)
         {
             if (choice == "") return false;
-            return choice[0] == '-' ? true : false;
+            return choice[0] == '-' ? false: true;
         }
 
         public static void WriteFriendRequestsMenu(User loggedUser, IMediator mediator)
@@ -187,7 +181,7 @@ namespace Presentation
         {
             int choice;
             string? choiceString;
-            bool removeFriendReq;
+            bool accepted;
 
             while (true)
             {
@@ -199,9 +193,9 @@ namespace Presentation
 
                 if (choiceString == "back") break;
 
-                removeFriendReq = CheckAcceptOrRemove(choiceString);
+                accepted = CheckAcceptOrRemove(choiceString);
 
-                if (removeFriendReq) choiceString = choiceString[1..];
+                if (accepted == false) choiceString = choiceString[1..];
 
                 choice = ConvertInputToInt(choiceString);
 
@@ -215,14 +209,14 @@ namespace Presentation
 
                     if (command.IsFaulted) throw command.Exception;
 
-                    mediator.Send(new AcceptOrRemoveFriendRequest
+                    mediator.Send(new UpdateFriendRequest
                     {
                         LoggedUser = loggedUser,
-                        idFriend = choice,
-                        removeFriendRequest = removeFriendReq
+                        IdFriend = choice, 
+                        Accepted = accepted
                     });
 
-                    if (removeFriendReq == true)
+                    if (accepted == false)
                     {
                         Console.WriteLine("Request removed succesfully.");
                     }
