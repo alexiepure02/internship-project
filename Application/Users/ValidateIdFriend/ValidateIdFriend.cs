@@ -11,6 +11,6 @@ namespace Application.Users.ValidateIdFriend
     public class ValidateIdFriend : IRequest
     {
         public User LoggedUser { get; set; }
-        public int idFriend { get; set; }
+        public int IdFriend { get; set; }
     }
 }

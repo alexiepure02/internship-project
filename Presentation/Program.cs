@@ -204,7 +204,7 @@ namespace Presentation
                     Task<Unit> command = mediator.Send(new ValidateIdFriend
                     {
                         LoggedUser = loggedUser,
-                        idFriend = choice
+                        IdFriend = choice
                     });
 
                     if (command.IsFaulted) throw command.Exception;
@@ -256,7 +256,7 @@ namespace Presentation
                     Task<Unit> command = mediator.Send(new ValidateIdFriend
                     {
                         LoggedUser = loggedUser,
-                        idFriend = choice
+                        IdFriend = choice
                     });
 
                     if (command.IsFaulted) throw command.Exception;
@@ -275,18 +275,6 @@ namespace Presentation
                 {
                     Console.WriteLine(ex.InnerException.Message + "\n");
                 }
-            }
-        }
-
-        public static void ValidateDeleteFriendId(User loggedUser, int choice, IMediator mediator)
-        {
-            if (loggedUser.Id == choice)
-            {
-                throw new SameIdException(choice);
-            }
-            if (mediator.Send(new GetUserById { Id = choice }).Result == null)
-            {
-                throw new UserNotFoundException(choice);
             }
         }
 
@@ -322,8 +310,21 @@ namespace Presentation
 
                 try
                 {
-                    ValidateDeleteFriendId(loggedUser, choice, mediator);
+                    // if AggregateException.InnerException == UserInFriendsException
+                    //      remove friend
+                    // else
+                    //      cw exception message
 
+                    Task<Unit> command = mediator.Send(new ValidateIdFriend
+                    {
+                        LoggedUser = loggedUser,
+                        IdFriend = choice
+                    });
+
+                    if (command.IsFaulted) throw command.Exception.InnerException;
+                }
+                catch (UserInFriendsException)
+                {
                     mediator.Send(new RemoveFriend
                     {
                         LoggedUser = loggedUser,
@@ -332,7 +333,6 @@ namespace Presentation
                     
                     Console.WriteLine("Friend removed successfully.\n");
                     break;
-
                 }
                 catch (Exception ex)
                 {

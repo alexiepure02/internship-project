@@ -20,7 +20,7 @@ namespace Application.Users.ValidateIdFriend
         {
             try
             {
-                _userRepository.ValidateIdFriend(users.LoggedUser, users.idFriend);
+                _userRepository.ValidateIdFriend(users.LoggedUser, users.IdFriend);
             }
             catch (Exception ex)
             {
