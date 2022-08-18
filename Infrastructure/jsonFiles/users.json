@@ -1,0 +1,48 @@
+[
+  {
+    "Username": "maryonline",
+    "Password": "1234",
+    "DisplayName": "Maria",
+    "Id": 7890,
+    "Friends": [
+      1302,
+      4685
+    ],
+    "FriendRequests": []
+  },
+  {
+    "Username": "andrei1",
+    "Password": "1234",
+    "DisplayName": "Andrei",
+    "Id": 1302,
+    "Friends": [
+      2014,
+      4685,
+      7890
+    ],
+    "FriendRequests": []
+  },
+  {
+    "Username": "johnn",
+    "Password": "1234",
+    "DisplayName": "John",
+    "Id": 2014,
+    "Friends": [
+      1302
+    ],
+    "FriendRequests": [
+      4685
+    ]
+  },
+  {
+    "Username": "alexiepure",
+    "Password": "1234",
+    "DisplayName": "Alex",
+    "Id": 4685,
+    "Friends": [
+      1302,
+      7890
+    ],
+    "FriendRequests": []
+  }
+]
