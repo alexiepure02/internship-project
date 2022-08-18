@@ -23,17 +23,6 @@
     "FriendRequests": []
   },
   {
-    "Username": "alexiepure",
-    "Password": "1234",
-    "DisplayName": "Alex",
-    "Id": 4685,
-    "Friends": [
-      1302,
-      7890
-    ],
-    "FriendRequests": []
-  },
-  {
     "Username": "johnn",
     "Password": "1234",
     "DisplayName": "John",
@@ -44,5 +33,16 @@
     "FriendRequests": [
       4685
     ]
+  },
+  {
+    "Username": "alexiepure",
+    "Password": "1234",
+    "DisplayName": "Alex",
+    "Id": 4685,
+    "Friends": [
+      1302,
+      7890
+    ],
+    "FriendRequests": []
   }
 ]

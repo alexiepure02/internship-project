@@ -54,7 +54,7 @@ namespace Infrastructure
         {
             User loggedUser = _users.Find((user) => username == user.Username && password == user.Password);
 
-            return loggedUser == null ? throw new UserNotFoundException(username) : loggedUser;
+            return loggedUser;
         }
 
         public User GetUserById(int id)
@@ -62,9 +62,9 @@ namespace Infrastructure
             return _users.Find(user => user.Id == id);
         }
 
-        public void AcceptOrRemoveFriendRequest(User loggedUser, int idFriend, bool removeFriendRequest)
+        public void UpdateFriendRequest(User loggedUser, int idFriend, bool accepted)
         {
-            if (removeFriendRequest == false)
+            if (accepted == true)
             {
                 loggedUser.Friends.Add(idFriend);
                 _users.Find(user => user.Id == idFriend).Friends.Add(loggedUser.Id);

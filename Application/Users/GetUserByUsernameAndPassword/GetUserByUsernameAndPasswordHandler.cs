@@ -15,16 +15,8 @@ namespace Application.Users.GetUserByUsernameAndPassword
 
         public Task<User> Handle(GetUserByUsernameAndPassword userInfo, CancellationToken cancellationToken)
         {
-            try
-            {
-                var user = _userRepository.GetUserByUsernameAndPassword(userInfo.Username, userInfo.Password);
-                return Task.FromResult(user);
-            }
-            catch (UserNotFoundException ex)
-            {
-                return Task.FromException<User>(ex);
-            }
-
+            var user = _userRepository.GetUserByUsernameAndPassword(userInfo.Username, userInfo.Password);
+            return Task.FromResult(user);
         }
     }
 }

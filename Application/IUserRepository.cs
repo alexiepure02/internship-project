@@ -17,7 +17,7 @@ namespace Application
         List<int> GetAllIds();
         User GetUserByUsernameAndPassword(string username, string password);
         User GetUserById(int id);
-        void AcceptOrRemoveFriendRequest(User loggedUser, int idFriend, bool removeFriendRequest);
+        void UpdateFriendRequest(User loggedUser, int idFriend, bool accepted);
         void ValidateIdFriend(User loggedUser, int idFriend);
         bool CheckIfFriendRequestExists(User loggedUser, User futureFriend);
         void SendFriendRequest(User loggedUser, int idFriend);
