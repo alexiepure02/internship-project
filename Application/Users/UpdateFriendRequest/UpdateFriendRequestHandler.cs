@@ -18,7 +18,7 @@ namespace Application.Users.UpdateFriendRequest
 
         public Task<Unit> Handle(UpdateFriendRequest info, CancellationToken cancellationToken)
         {
-            _userRepository.UpdateFriendRequest(info.LoggedUser, info.IdFriend, info.Accepted);
+            _userRepository.UpdateFriendRequest(info.LoggedUser, info.Friend, info.Accepted);
 
             return Task.FromResult(Unit.Value);
         }

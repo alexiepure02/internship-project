@@ -11,7 +11,7 @@ namespace Application.Users.UpdateFriendRequest
     public class UpdateFriendRequest : IRequest
     {
         public User LoggedUser { get; set; }
-        public int IdFriend { get; set; }
+        public User Friend { get; set; }
         public bool Accepted { get; set; }
     }
 }

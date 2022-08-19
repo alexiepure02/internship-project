@@ -58,8 +58,8 @@ namespace xUnitTests
             }
         }
         
-        [Fact]
-        public void ValidateIdFriendTest()
+       // [Fact]
+       /* public void ValidateIdFriendTest()
         {
             var repo = new InMemoryUserRepository();
 
@@ -105,9 +105,9 @@ namespace xUnitTests
             {
                 Assert.Equal($"Error: User with the id {friend.ID} is already a friend.", ex.Message);
             }
-        }
+        }*/
 
-        [Fact]
+        /*[Fact]
         public void SendFriendRequestTest()
         {
             var repo = new InMemoryUserRepository();
@@ -156,6 +156,6 @@ namespace xUnitTests
 
             Assert.DoesNotContain(futureNonFriend.ID, futureFriend.Friends);
             Assert.DoesNotContain(futureNonFriend.ID, user.FriendRequests);
-        }
+        }*/
     }
 }

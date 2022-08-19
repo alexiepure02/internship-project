@@ -9,6 +9,8 @@ namespace Domain
 {
     public class Friends
     {
+        public int ID { get; set; }
+
         [ForeignKey(nameof(IDUser))]
         public int IDUser { get; set; }
         public User User { get; set; }

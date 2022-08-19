@@ -168,8 +168,9 @@ namespace Presentation
 
         public static void WriteFriendRequestsMenu(User loggedUser, IMediator mediator)
         {
-            foreach (int id in loggedUser.FriendRequests)
+            foreach (var user in loggedUser.FriendRequests)
             {
+                int id = user.ID;
                 string displayName = mediator.Send(new GetUserById { Id = id}).Result.DisplayName;
                 Console.WriteLine($"{displayName} - {id}");
             }
@@ -209,10 +210,15 @@ namespace Presentation
 
                     if (command.IsFaulted) throw command.Exception;
 
+                    User friend = mediator.Send(new GetUserById
+                    {
+                        Id = choice
+                    }).Result;
+
                     mediator.Send(new UpdateFriendRequest
                     {
                         LoggedUser = loggedUser,
-                        IdFriend = choice, 
+                        Friend = friend,
                         Accepted = accepted
                     });
 
@@ -280,8 +286,9 @@ namespace Presentation
 
         public static void WriteDeleteFriendsMenu(User loggedUser, IMediator mediator)
         {
-            foreach (int id in loggedUser.Friends)
+            foreach (var user in loggedUser.Friends)
             {
+                int id = user.ID;
                 string displayName = mediator.Send(new GetUserById { Id = id }).Result.DisplayName;
 
                 Console.WriteLine($"{displayName} - {id}");
@@ -325,10 +332,15 @@ namespace Presentation
                 }
                 catch (UserInFriendsException)
                 {
+                    User friend = mediator.Send(new GetUserById
+                    {
+                        Id = choice
+                    }).Result;
+
                     mediator.Send(new RemoveFriend
                     {
                         LoggedUser = loggedUser,
-                        IdFriend = choice
+                        Friend = friend
                     });
                     
                     Console.WriteLine("Friend removed successfully.\n");
@@ -463,8 +475,14 @@ namespace Presentation
         }
         static int Main(string[] args)
         {
-            List<User> users = ManageData.Instance.GetItemsFromJson<List<User>>("users");
-            List<Message> messages = ManageData.Instance.GetItemsFromJson<List<Message>>("messages");
+            //List<User> users = ManageData.Instance.GetItemsFromJson<List<User>>("users");
+            //List<Message> messages = ManageData.Instance.GetItemsFromJson<List<Message>>("messages");
+
+            // adapted domain classes to make relationships in ef core
+            // and now the json data is no longer compatible with the classes
+
+            List<User> users = new();
+            List<Message> messages = new();
 
             var services = new ServiceCollection()
                 .AddScoped<IUserRepository, InMemoryUserRepository>()

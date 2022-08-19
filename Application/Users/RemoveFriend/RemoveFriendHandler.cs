@@ -18,7 +18,7 @@ namespace Application.Users.RemoveFriend
 
         public Task<Unit> Handle(RemoveFriend users, CancellationToken cancellationToken)
         {
-            _userRepository.RemoveFriend(users.LoggedUser, users.IdFriend);
+            _userRepository.RemoveFriend(users.LoggedUser, users.Friend);
 
             return Task.FromResult(Unit.Value);
         }

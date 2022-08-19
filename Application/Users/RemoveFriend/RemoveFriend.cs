@@ -11,6 +11,6 @@ namespace Application.Users.RemoveFriend
     public class RemoveFriend : IRequest
     {
         public User LoggedUser { get; set; }
-        public int IdFriend { get; set; }
+        public User Friend { get; set; }
     }
 }
