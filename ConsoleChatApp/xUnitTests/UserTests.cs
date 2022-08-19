@@ -133,7 +133,7 @@ namespace xUnitTests
         }
 
         [Fact]
-        public void AcceptOrRemoveFriendRequestTest()
+        public void UpdateFriendRequestTest()
         {
             var repo = new InMemoryUserRepository();
 
@@ -145,14 +145,14 @@ namespace xUnitTests
 
             // accept friend request scenario
 
-            repo.AcceptOrRemoveFriendRequest(user, futureFriend.ID, false); // remove = false
+            repo.UpdateFriendRequest(user, futureFriend.ID, true); // accepted = true
 
             Assert.Contains(futureFriend.ID, user.Friends);
             Assert.DoesNotContain(futureFriend.ID, user.FriendRequests);
 
             // remove friend request scenario
 
-            repo.AcceptOrRemoveFriendRequest(user, futureNonFriend.ID, true); // remove = true
+            repo.UpdateFriendRequest(user, futureNonFriend.ID, false); // accepted = false
 
             Assert.DoesNotContain(futureNonFriend.ID, futureFriend.Friends);
             Assert.DoesNotContain(futureNonFriend.ID, user.FriendRequests);
