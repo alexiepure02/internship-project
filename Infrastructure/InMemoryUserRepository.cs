@@ -44,7 +44,7 @@ namespace Infrastructure
 
             foreach (User user in _users)
             {
-                ids.Add(user.Id);
+                ids.Add(user.ID);
             }
 
             return ids;
@@ -59,7 +59,7 @@ namespace Infrastructure
 
         public User GetUserById(int id)
         {
-            return _users.Find(user => user.Id == id);
+            return _users.Find(user => user.ID == id);
         }
 
         public void UpdateFriendRequest(User loggedUser, int idFriend, bool accepted)
@@ -67,14 +67,14 @@ namespace Infrastructure
             if (accepted == true)
             {
                 loggedUser.Friends.Add(idFriend);
-                _users.Find(user => user.Id == idFriend).Friends.Add(loggedUser.Id);
+                _users.Find(user => user.ID == idFriend).Friends.Add(loggedUser.ID);
             }
             loggedUser.FriendRequests.Remove(idFriend);
         }
 
         public void ValidateIdFriend(User loggedUser, int idFriend)
         {
-            if (loggedUser.Id == idFriend)
+            if (loggedUser.ID == idFriend)
             {
                 throw new SameIdException(idFriend);
             }
@@ -90,24 +90,24 @@ namespace Infrastructure
 
         public bool CheckIfFriendRequestExists(User loggedUser, User futureFriend)
         {
-            return futureFriend.FriendRequests.Contains(loggedUser.Id);
+            return futureFriend.FriendRequests.Contains(loggedUser.ID);
         }
 
         public void SendFriendRequest(User loggedUser, int idFutureFriend)
         {
-            User futureFriend = _users.Find(user => user.Id == idFutureFriend);
+            User futureFriend = _users.Find(user => user.ID == idFutureFriend);
 
             if (futureFriend == null) throw new UserNotFoundException(idFutureFriend);
 
             if (!CheckIfFriendRequestExists(loggedUser, futureFriend))
-                futureFriend.FriendRequests.Add(loggedUser.Id);
+                futureFriend.FriendRequests.Add(loggedUser.ID);
 
         }
 
         public void RemoveFriend(User loggedUser, int idFriend)
         {
             loggedUser.Friends.Remove(idFriend);
-            _users.Find(user => user.Id == idFriend).Friends.Remove(loggedUser.Id);
+            _users.Find(user => user.ID == idFriend).Friends.Remove(loggedUser.ID);
         }
 
         public int GetUsersCount()

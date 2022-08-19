@@ -352,7 +352,9 @@ namespace Presentation
 
             for (int i = 0; i < loggedUser.Friends.Count; i++)
             {
-                string displayName = mediator.Send(new GetUserById { Id = loggedUser.Friends[i] }).Result.DisplayName;
+                // DON'T FORGET ABOUT THIS
+
+                string displayName = mediator.Send(new GetUserById { Id = 1 /*loggedUser.Friends[i]*/ }).Result.DisplayName;
 
                 Console.WriteLine($"{i + 1}. {displayName}");
             }
@@ -381,7 +383,9 @@ namespace Presentation
 
                     if (CheckIfChoiceValid(choice, numberOfFriends))
                     {
-                        User friend = mediator.Send(new GetUserById { Id = loggedUser.Friends[choice - 1] }).Result;
+                        // DON'T FORGET ABOUT THIS
+
+                        User friend = mediator.Send(new GetUserById { Id = 1 /*loggedUser.Friends[choice - 1]*/ }).Result;
                         MessagesMenu(loggedUser, friend, mediator);
                     }
                 }
@@ -395,18 +399,18 @@ namespace Presentation
     // change this
         public static void WriteMessagesBetweenTwoUsers(User user1, User user2, List<Message> messages)
         {
-            int idUser1 = user1.Id;
-            int idUser2 = user2.Id;
+            int idUser1 = user1.ID;
+            int idUser2 = user2.ID;
 
             Console.WriteLine($"{user2.DisplayName}:");
 
             foreach (Message message in messages)
             {
-                if (message.IdSender == idUser1 && message.IdReceiver == idUser2)
+                if (message.IDSender == idUser1 && message.IDReceiver == idUser2)
                 {
                     Console.WriteLine(string.Format("{0,70}", message.Text));
                 }
-                else if (message.IdSender == idUser2 && message.IdReceiver == idUser1)
+                else if (message.IDSender == idUser2 && message.IDReceiver == idUser1)
                 {
                     Console.WriteLine(message.Text);
                 }
@@ -422,8 +426,8 @@ namespace Presentation
             {
                 List<Message> messages = mediator.Send(new GetMessagesBetweenTwoUsers
                 {
-                    IdSender = loggedUser.Id,
-                    IdReceiver = friend.Id
+                    IdSender = loggedUser.ID,
+                    IdReceiver = friend.ID
                 }).Result;
 
                 WriteMessagesBetweenTwoUsers(loggedUser, friend, messages);
@@ -442,8 +446,8 @@ namespace Presentation
                     
                     mediator.Send(new AddMessage
                     {
-                        IdSender = loggedUser.Id,
-                        IdReceiver = friend.Id,
+                        IdSender = loggedUser.ID,
+                        IdReceiver = friend.ID,
                         Message = sentMessage
                     });
                 }

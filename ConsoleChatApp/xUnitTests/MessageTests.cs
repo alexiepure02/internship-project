@@ -69,19 +69,19 @@ namespace xUnitTests
 
             var messagesBetween1And2 = new List<Message>
             {
-                new Message { IdSender = 1, IdReceiver = 2, Text = "hello"},
-                new Message { IdSender = 2, IdReceiver = 1, Text = "hi"},
-                new Message { IdSender = 1, IdReceiver = 2, Text = "how are you"},
-                new Message { IdSender = 2, IdReceiver = 1, Text = "i'm fine"},
-                new Message { IdSender = 1, IdReceiver = 2, Text = "ok"},
-                new Message { IdSender = 1, IdReceiver = 2, Text = "bye"},
+                new Message { IDSender = 1, IDReceiver = 2, Text = "hello"},
+                new Message { IDSender = 2, IDReceiver = 1, Text = "hi"},
+                new Message { IDSender = 1, IDReceiver = 2, Text = "how are you"},
+                new Message { IDSender = 2, IDReceiver = 1, Text = "i'm fine"},
+                new Message { IDSender = 1, IDReceiver = 2, Text = "ok"},
+                new Message { IDSender = 1, IDReceiver = 2, Text = "bye"},
             };
 
             var dummyMessages = new List<Message>
             {
-                new Message { IdSender = 3, IdReceiver = 1, Text = "dummy"},
-                new Message { IdSender = 1, IdReceiver = 3, Text = "dummy"},
-                new Message { IdSender = 3, IdReceiver = 2, Text = "dummy"},
+                new Message { IDSender = 3, IDReceiver = 1, Text = "dummy"},
+                new Message { IDSender = 1, IDReceiver = 3, Text = "dummy"},
+                new Message { IDSender = 3, IDReceiver = 2, Text = "dummy"},
             };
 
             repo.AddMessages(messagesBetween1And2);

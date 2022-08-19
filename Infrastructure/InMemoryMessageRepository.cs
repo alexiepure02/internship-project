@@ -20,8 +20,8 @@ namespace Infrastructure
         {
             List<Message> newMessages;
 
-            newMessages = _messages.FindAll(message => message.IdSender == idSender && message.IdReceiver == idReceiver ||
-            message.IdSender == idReceiver && message.IdReceiver == idSender);
+            newMessages = _messages.FindAll(message => message.IDSender == idSender && message.IDReceiver == idReceiver ||
+            message.IDSender == idReceiver && message.IDReceiver == idSender);
 
             /*foreach (var message in _messages)
             {
@@ -58,7 +58,7 @@ namespace Infrastructure
         }
         public void AddMessage(int idSender, int idReceiver, string message)
         {
-            _messages.Add(new Message() { IdSender = idSender, IdReceiver = idReceiver, DateTime = DateTime.UtcNow.ToString(), Text = message });
+            _messages.Add(new Message() { IDSender = idSender, IDReceiver = idReceiver, DateTime = DateTime.UtcNow.ToString(), Text = message });
 
         }
 
