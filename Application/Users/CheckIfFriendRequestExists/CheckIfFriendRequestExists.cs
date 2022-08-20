@@ -11,6 +11,6 @@ namespace Application.Users.CheckIfFriendRequestExists
     public class CheckIfFriendRequestExists : IRequest<bool>
     {
         public User LoggedUser { get; set; }
-        public User FutureFriend { get; set; }
+        public User Friend { get; set; }
     }
 }

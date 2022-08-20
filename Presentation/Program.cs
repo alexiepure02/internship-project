@@ -170,9 +170,9 @@ namespace Presentation
         {
             foreach (var user in loggedUser.FriendRequests)
             {
-                int id = user.ID;
-                string displayName = mediator.Send(new GetUserById { Id = id}).Result.DisplayName;
-                Console.WriteLine($"{displayName} - {id}");
+                //int id = user.ID;
+                //string displayName = mediator.Send(new GetUserById { Id = id}).Result.DisplayName;
+                Console.WriteLine($"{user.DisplayName} - {user.ID}");
             }
 
             Console.Write("\nType ID of user to accept or -ID to decline: ");
@@ -194,14 +194,21 @@ namespace Presentation
 
                 if (choiceString == "back") break;
 
-                accepted = CheckAcceptOrRemove(choiceString);
-
-                if (accepted == false) choiceString = choiceString[1..];
-
-                choice = ConvertInputToInt(choiceString);
 
                 try
                 {
+                    if (choiceString == "")
+                    {
+                        throw new UserNotFoundException(-1);
+                    }
+                    accepted = CheckAcceptOrRemove(choiceString);
+
+                    // exception unhandled
+                    // System.ArgumentOutOfRangeException
+                    // Message = startIndex cannot be larger than length of string. (Parameter 'startIndex')
+                    if (accepted == false) choiceString = choiceString[1..];
+
+                    choice = ConvertInputToInt(choiceString);
                     Task<Unit> command = mediator.Send(new ValidateIdFriend
                     {
                         LoggedUser = loggedUser,
@@ -236,6 +243,10 @@ namespace Presentation
                 catch (AggregateException ex)
                 {
                     Console.WriteLine(ex.InnerException.Message + "\n");
+                }
+                catch (UserNotFoundException ex)
+                {
+                    Console.WriteLine(ex.Message + "\n");
                 }
             }
         }
@@ -288,7 +299,7 @@ namespace Presentation
         {
             foreach (var user in loggedUser.Friends)
             {
-                int id = user.ID;
+                int id = user.IDFriend;
                 string displayName = mediator.Send(new GetUserById { Id = id }).Result.DisplayName;
 
                 Console.WriteLine($"{displayName} - {id}");
@@ -329,6 +340,10 @@ namespace Presentation
                     });
 
                     if (command.IsFaulted) throw command.Exception.InnerException;
+
+                    // introduced id doesn't belong to any user in friends list
+
+                    throw new UserNotFoundException(choice);
                 }
                 catch (UserInFriendsException)
                 {
@@ -364,9 +379,7 @@ namespace Presentation
 
             for (int i = 0; i < loggedUser.Friends.Count; i++)
             {
-                // DON'T FORGET ABOUT THIS
-
-                string displayName = mediator.Send(new GetUserById { Id = 1 /*loggedUser.Friends[i]*/ }).Result.DisplayName;
+                string displayName = mediator.Send(new GetUserById { Id = loggedUser.Friends[i].IDFriend }).Result.DisplayName;
 
                 Console.WriteLine($"{i + 1}. {displayName}");
             }
@@ -397,7 +410,7 @@ namespace Presentation
                     {
                         // DON'T FORGET ABOUT THIS
 
-                        User friend = mediator.Send(new GetUserById { Id = 1 /*loggedUser.Friends[choice - 1]*/ }).Result;
+                        User friend = mediator.Send(new GetUserById { Id = loggedUser.Friends[choice - 1].IDFriend }).Result;
                         MessagesMenu(loggedUser, friend, mediator);
                     }
                 }
@@ -458,14 +471,14 @@ namespace Presentation
                     
                     mediator.Send(new AddMessage
                     {
-                        IdSender = loggedUser.ID,
-                        IdReceiver = friend.ID,
+                        Sender = loggedUser,
+                        Receiver = friend,
                         Message = sentMessage
                     });
                 }
                 catch (AggregateException ex)
                 {
-                    Console.WriteLine(ex.InnerException.Message + "/n");
+                    Console.WriteLine(ex.InnerException.Message + "\n");
                 }
                 catch (Exception ex)
                 {
@@ -481,8 +494,101 @@ namespace Presentation
             // adapted domain classes to make relationships in ef core
             // and now the json data is no longer compatible with the classes
 
-            List<User> users = new();
+            List<User> users = new List<User>
+            {
+                new User
+                {
+                    ID = 1,
+                    Username = "alexiepure",
+                    Password = "1234",
+                    DisplayName = "Alex",
+                    Messages = new List<Message>
+                    {
+                        new Message
+                        {
+                            IDSender = 1,
+                            IDReceiver = 2,
+                            Text = "aaa"
+                        }
+                    },
+                    MainUserFriends = new List<Friends>
+                    {
+                        new Friends
+                        {
+                            IDUser = 1,
+                            IDFriend = 2
+                        }
+                    },
+                    Friends = new List<Friends>
+                    {
+                        new Friends
+                        {
+                            IDUser = 1,
+                            IDFriend = 2
+                        }
+                    },
+                    FriendRequests = new List<User>()
+                },
+                new User
+                {
+                    ID = 2,
+                    Username = "andrei1",
+                    Password = "1234",
+                    DisplayName = "Andrei",
+                    Messages = new List<Message>
+                    {
+                        new Message
+                        {
+                            IDSender = 2,
+                            IDReceiver = 1,
+                            Text = "bbb"
+                        }
+                    },
+                    MainUserFriends = new List<Friends>
+                    {
+                        new Friends
+                        {
+                            IDUser = 2,
+                            IDFriend = 1
+                        }
+                    },
+                    Friends = new List<Friends>
+                    {
+                        new Friends
+                        {
+                            IDUser = 2,
+                            IDFriend = 1
+                        }
+                    },
+                    FriendRequests = new List<User>()
+                },
+                new User
+                {
+                    ID = 3,
+                    Username = "maria",
+                    Password = "1234",
+                    DisplayName = "Maria",
+                    Messages = new List<Message>
+                    {
+                    },
+                    MainUserFriends = new List<Friends>
+                    {
+                    },
+                    Friends = new List<Friends>
+                    {
+                    },
+                    FriendRequests = new List<User>()
+                }
+            };
+
             List<Message> messages = new();
+            foreach (User user in users)
+            {
+                foreach (Message message in user.Messages)
+                {
+                    messages.Add(message);
+                }
+            }
 
             var services = new ServiceCollection()
                 .AddScoped<IUserRepository, InMemoryUserRepository>()
@@ -505,10 +611,10 @@ namespace Presentation
             LoginMenu(mediator);
 
             users = mediator.Send(new GetUsers()).Result;
-            messages = mediator.Send(new GetMessages()).Result;
+            //messages = mediator.Send(new GetMessages()).Result;
 
-            ManageData.Instance.PutItemsIntoJson<List<User>>(users, "users");
-            ManageData.Instance.PutItemsIntoJson<List<Message>>(messages, "messages");
+            //ManageData.Instance.PutItemsIntoJson<List<User>>(users, "users");
+            //ManageData.Instance.PutItemsIntoJson<List<Message>>(messages, "messages");
 
             return 0;
         }

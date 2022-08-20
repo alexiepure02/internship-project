@@ -35,7 +35,7 @@ namespace Infrastructure
 
             modelBuilder.Entity<Friends>()
                 .HasOne(f => f.Friend)
-                .WithMany(mu => mu.Friends1)
+                .WithMany(mu => mu.Friends)
                 .HasForeignKey(f => f.IDFriend);
 
             modelBuilder.Entity<User>().HasMany(u => u.Messages).WithOne(u => u.Sender).HasForeignKey(u => u.IDSender).OnDelete(DeleteBehavior.Restrict);

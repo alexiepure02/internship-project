@@ -18,7 +18,7 @@ namespace Application.Users.CheckIfFriendRequestExists
 
         public Task<bool> Handle(CheckIfFriendRequestExists users, CancellationToken cancellationToken)
         {
-            var exists = _userRepository.CheckIfFriendRequestExists(users.LoggedUser, users.FutureFriend);
+            var exists = _userRepository.CheckIfFriendRequestExists(users.LoggedUser, users.Friend);
 
             return Task.FromResult(exists);
         }

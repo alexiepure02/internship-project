@@ -12,13 +12,12 @@ namespace Domain
 
         //public List<int> Friends { get; set; }
         //public List<int> FriendRequests { get; set; }
-        [NotMapped]
-        public virtual ICollection<User> Friends { get; set; }
+        //[NotMapped]
+        //public virtual ICollection<User> Friends { get; set; }
 
         public ICollection<Message> Messages { get; set; }
         public virtual ICollection<Friends> MainUserFriends { get; set; }
-        public virtual ICollection<Friends> Friends1 { get; set; }
-        [NotMapped]
-        public virtual ICollection<User> FriendRequests { get; set; }
+        public virtual IList<Friends> Friends { get; set; }
+        public virtual IList<User> FriendRequests { get; set; }
     }
 }

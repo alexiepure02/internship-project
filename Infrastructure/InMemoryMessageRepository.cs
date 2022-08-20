@@ -56,9 +56,9 @@ namespace Infrastructure
                 throw new InvalidMessageException("The message contains profanity.");
             }
         }
-        public void AddMessage(int idSender, int idReceiver, string message)
+        public void AddMessage(User sender, User receiver, string message)
         {
-            _messages.Add(new Message() { IDSender = idSender, IDReceiver = idReceiver, DateTime = DateTime.UtcNow.ToString(), Text = message });
+            _messages.Add(new Message() { IDSender = sender.ID, Sender = sender, IDReceiver = receiver.ID, Receiver = receiver, DateTime = DateTime.UtcNow.ToString(), Text = message });
 
         }
 

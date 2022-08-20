@@ -18,7 +18,7 @@ namespace Application.Messages.AddMessage
 
         public Task<Unit> Handle(AddMessage info, CancellationToken cancellationToken)
         {
-            _messageRepository.AddMessage(info.IdSender, info.IdReceiver, info.Message);
+            _messageRepository.AddMessage(info.Sender, info.Receiver, info.Message);
 
             return Task.FromResult(Unit.Value);
         }
