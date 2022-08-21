@@ -16,6 +16,7 @@ namespace Application
         List<string> GetAllDisplayNames();
         List<int> GetAllIds();
         Friends GetFriendOfUser(User user, User friend);
+        FriendRequests GetFriendRequestOfUser(User user, User friend);
         User GetUserByUsernameAndPassword(string username, string password);
         User GetUserById(int id);
         void UpdateFriendRequest(User loggedUser, User Friend, bool accepted);
@@ -23,6 +24,7 @@ namespace Application
         bool CheckIfFriendRequestExists(User loggedUser, User friend);
         void SendFriendRequest(User loggedUser, int idFriend);
         void RemoveFriend(User loggedUser, User Friend);
+        string ValidateNewUser(User user);
         int GetUsersCount();
         List<User> GetUsers();
     }

@@ -18,6 +18,6 @@ namespace Domain
         public ICollection<Message> Messages { get; set; }
         public virtual ICollection<Friends> MainUserFriends { get; set; }
         public virtual IList<Friends> Friends { get; set; }
-        public virtual IList<User> FriendRequests { get; set; }
+        public virtual IList<FriendRequests> FriendRequests { get; set; }
     }
 }
