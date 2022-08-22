@@ -1,4 +1,5 @@
-﻿using Domain;
+﻿using Application;
+using Domain;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -8,15 +9,17 @@ using System.Threading.Tasks;
 
 namespace Infrastructure
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : DbContext, IAppDbContext
     {
         public DbSet<User> Users { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<Friends> Friends { get; set; }
-        public DbSet<FriendRequests> FriendsRequests { get; set; }
+        public DbSet<FriendRequests> FriendRequests { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder builder) =>
-            builder.UseSqlServer(@"Data Source=IEPURE\SQLEXPRESS;DataBase=InternshipProjectDb;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
+        public async Task<int> SaveChanges() => await base.SaveChangesAsync();
+
+        protected override void OnConfiguring(DbContextOptionsBuilder builder) =>
+                builder.UseSqlServer(@"Data Source=IEPURE\SQLEXPRESS;DataBase=InternshipProjectDb;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -49,7 +52,7 @@ namespace Infrastructure
                 .HasOne(u => u.Receiver);
 
             // one-to-many friend requests
-            
+
             modelBuilder.Entity<FriendRequests>()
                 .HasOne(u => u.User)
                 .WithMany(u => u.FriendRequests)
