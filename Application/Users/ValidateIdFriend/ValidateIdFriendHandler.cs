@@ -16,11 +16,11 @@ namespace Application.Users.ValidateIdFriend
             _userRepository = userRepository;
         }
 
-        public Task<Unit> Handle(ValidateIdFriend users, CancellationToken cancellationToken)
+        public Task<Unit> Handle(ValidateIdFriend info, CancellationToken cancellationToken)
         {
             try
             {
-                _userRepository.ValidateIdFriend(users.LoggedUser, users.IdFriend);
+                _userRepository.ValidateIdFriend(info.IdUser, info.IdFriend);
             }
             catch (Exception ex)
             {
