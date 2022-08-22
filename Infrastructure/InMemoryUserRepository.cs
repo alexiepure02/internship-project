@@ -98,25 +98,11 @@ namespace Infrastructure
             loggedUser.FriendRequests.Remove(friendRequest);
         }
 
-        public void ValidateIdFriend(User loggedUser, int idFriend)
+        public void ValidateIdFriend(int idUser, int idFriend)
         {
-            if (loggedUser.ID == idFriend)
+            if (idUser == idFriend)
             {
                 throw new SameIdException(idFriend);
-            }
-
-            User friendUser = GetUserById(idFriend);
-
-            if (friendUser == null)
-            {
-                throw new UserNotFoundException(idFriend);
-            }
-
-            Friends friend = GetFriendOfUser(loggedUser, friendUser);
-
-            if (friend != null)
-            {
-                throw new UserInFriendsException(idFriend);
             }
         }
 

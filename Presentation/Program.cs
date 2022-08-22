@@ -28,6 +28,20 @@ using Application.Users.CheckIfFriendRequestExists;
 using Application.Users.GetFriendOfUser;
 using Application.Users.GetFriendRequestOfUser;
 using Application.Users.ValidateNewUser;
+using Application.Queries.GetUserByAccountQuery;
+using Application.Queries.GetAllUsersQuery;
+using Application.Commands.AddUserCommand;
+using Application.Queries.GetUserByIdQuery;
+using Application.Queries.GetFriendRequestOfUserQuery;
+using Application.Queries.CheckIfFriendRequestExistsQuery;
+using Application.Commands.UpdateFriendRequestCommand;
+using Application.Commands.AddFriendRequestCommand;
+using Application.Commands.RemoveFriendCommand;
+using Application.Commands.AddMessageCommand;
+using Application.Queries.GetAllFriendsOfUserQuery;
+using Application.Queries.GetAllFriendRequestsOfUserQuery;
+using Application.Queries.GetMessagesBetweenTwoUsersQuery;
+using Application.Queries.CheckIfFriendExistsQuery;
 
 namespace Presentation
 {
@@ -40,7 +54,7 @@ namespace Presentation
             Console.WriteLine("0. Exit");
             Console.Write("\nPick your choice: ");
         }
-        public static void FirstMenu(IMediator mediator, AppDbContext context)
+        public static void FirstMenu(IMediator mediator)
         {
             string choice;
 
@@ -55,9 +69,9 @@ namespace Presentation
                 if (choice == "0") break;
 
                 if (choice == "1")
-                    LoginMenu(mediator, context);
+                    LoginMenu(mediator);
                 else if (choice == "2")
-                    RegisterMenu(mediator, context);
+                    RegisterMenu(mediator);
                 else
                     Console.WriteLine("Pick between 1 and 2.\n");
             }
@@ -70,11 +84,11 @@ namespace Presentation
             Console.Write("password: ");
             string? password = Console.ReadLine();
 
-                User user = mediator.Send(new GetUserByUsernameAndPassword
-                {
-                    Username = username,
-                    Password = password
-                }).Result;
+            User user = mediator.Send(new GetUserByAccountQuery
+            {
+                Username = username,
+                Password = password
+            }).Result;
 
             // i have to check for null here because, if i check it in LoginMenu,
             // i lose the typed username, so i have to throw the exception here
@@ -82,7 +96,7 @@ namespace Presentation
             return user == null ? throw new UserNotFoundException(username) : user;
         }
 
-        public static void LoginMenu(IMediator mediator, AppDbContext context)
+        public static void LoginMenu(IMediator mediator)
         {
             User loggedUser;
 
@@ -96,17 +110,7 @@ namespace Presentation
                     
                     Console.Clear();
 
-                    mediator.Send(new RemoveUser
-                    {
-                        User = loggedUser
-                    });
-
-                    PreFriendsMenu(loggedUser, mediator, context);
-
-                    mediator.Send(new AddUser
-                    {
-                        User = loggedUser
-                    });
+                    PreFriendsMenu(loggedUser.ID, mediator);
                 }
                 catch (UserNotFoundException ex)
                 {
@@ -117,7 +121,7 @@ namespace Presentation
             }
         }
 
-        public static void RegisterMenu(IMediator mediator, AppDbContext context)
+        public static void RegisterMenu(IMediator mediator)
         {
             while (true)
             {
@@ -130,7 +134,9 @@ namespace Presentation
 
                 Console.Clear();
 
-                int numberOfUsers = mediator.Send(new GetAllDisplayNames()).Result.Count();
+                int numberOfUsers = mediator.Send(new GetAllUsersQuery()).Result.Count();
+
+                // int numberOfUsers = mediator.Send(new GetAllDisplayNames()).Result.Count();
 
                 User user = new User
                 {
@@ -150,12 +156,12 @@ namespace Presentation
 
                 if (result == "all good")
                 {
-                    mediator.Send(new AddUser { User = user });
+                    //mediator.Send(new AddUser { User = user });
 
-                    // database query
-
-                    context.Add(user);
-                    context.SaveChanges();
+                    mediator.Send(new AddUserCommand
+                    {
+                        User = user
+                    });
 
                     break;
                 }
@@ -195,7 +201,7 @@ namespace Presentation
             Console.Write("\nPick your choice: ");
         }
 
-        public static void PreFriendsMenu(User loggedUser, IMediator mediator, AppDbContext context)
+        public static void PreFriendsMenu(int idUser, IMediator mediator)
         {
             int choice;
             string? choiceString;
@@ -219,16 +225,16 @@ namespace Presentation
                         switch (choice)
                         {
                             case 1:
-                                FriendsMenu(loggedUser, mediator, context);
+                                FriendsMenu(idUser, mediator);
                                 break;
                             case 2:
-                                FriendRequestsMenu(loggedUser, mediator, context);
+                                FriendRequestsMenu(idUser, mediator);
                                 break;
                             case 3:
-                                AddFriendMenu(loggedUser, mediator,context);
+                                AddFriendMenu(idUser, mediator);
                                 break;
                             case 4:
-                                DeleteFriendMenu(loggedUser, mediator, context);
+                                DeleteFriendMenu(idUser, mediator);
                                 break;
                             default:
                                 break;
@@ -248,19 +254,32 @@ namespace Presentation
             return choice[0] == '-' ? false: true;
         }
 
-        public static void WriteFriendRequestsMenu(User loggedUser, IMediator mediator)
+        public static void WriteFriendRequestsMenu(int idUser, IMediator mediator)
         {
-            foreach (var user in loggedUser.FriendRequests)
+
+            // get all friends of user query
+
+            List<FriendRequests> friendRequests = mediator.Send(new GetAllFriendRequestsOfUserQuery
             {
-                int id = user.IDRequester;
-                string displayName = mediator.Send(new GetUserById { Id = id}).Result.DisplayName;
-                Console.WriteLine($"{displayName} - {id}");
+                IDUser = idUser
+            }).Result;
+
+            foreach (var friendRequest in friendRequests)
+            {
+                string displayName = mediator.Send(new GetUserByIdQuery
+                {
+                    Id = friendRequest.IDRequester
+                }).Result.DisplayName;
+                
+                //string displayName = mediator.Send(new GetUserById { Id = id}).Result.DisplayName;
+                
+                Console.WriteLine($"{displayName} - {friendRequest.IDRequester}");
             }
 
             Console.Write("\nType ID of user to accept or -ID to decline: ");
         }
 
-        public static void FriendRequestsMenu(User loggedUser, IMediator mediator, AppDbContext context)
+        public static async void FriendRequestsMenu(int idUser, IMediator mediator)
         {
             int choice;
             string? choiceString;
@@ -268,7 +287,7 @@ namespace Presentation
 
             while (true)
             {
-                WriteFriendRequestsMenu(loggedUser, mediator);
+                WriteFriendRequestsMenu(idUser, mediator);
 
                 choiceString = Console.ReadLine();
 
@@ -284,30 +303,22 @@ namespace Presentation
                     }
                     accepted = CheckAcceptOrRemove(choiceString);
 
-                    // exception unhandled
-                    // System.ArgumentOutOfRangeException
-                    // Message = startIndex cannot be larger than length of string. (Parameter 'startIndex')
                     if (accepted == false) choiceString = choiceString[1..];
 
                     choice = ConvertInputToInt(choiceString);
 
                     Task<Unit> command = mediator.Send(new ValidateIdFriend
                     {
-                        LoggedUser = loggedUser,
+                        IdUser = idUser,
                         IdFriend = choice
                     });
 
                     if (command.IsFaulted) throw command.Exception;
 
-                    User friend = mediator.Send(new GetUserById
+                    bool friendRequestExists = mediator.Send(new CheckIfFriendRequestExistsQuery
                     {
-                        Id = choice
-                    }).Result;
-
-                    bool friendRequestExists = mediator.Send(new CheckIfFriendRequestExists
-                    {
-                        LoggedUser = loggedUser,
-                        Friend = friend
+                        IDUser = idUser,
+                        IDRequester = choice
                     }).Result;
 
                     if (!friendRequestExists)
@@ -315,41 +326,11 @@ namespace Presentation
                         throw new UserNotFoundException(-1);
                     }
 
-                    // save friend reference in order to be able to
-                    // delete from database
-
-                    FriendRequests friendRequest = mediator.Send(new GetFriendRequestOfUser
+                    await mediator.Send(new UpdateFriendRequestCommand
                     {
-                        User = loggedUser,
-                        Friend = friend
-                    }).Result;
-
-                    mediator.Send(new UpdateFriendRequest
-                    {
-                        LoggedUser = loggedUser,
-                        Friend = friend,
-                        Accepted = accepted
+                        IDUser = idUser,
+                        IDRequester = choice
                     });
-
-                    // database query
-
-                    context.Add(new Friends
-                    {
-                        IDUser = loggedUser.ID,
-                        IDFriend = friend.ID
-                    });
-                    context.Add(new Friends
-                    {
-                        IDUser = friend.ID,
-                        IDFriend = loggedUser.ID
-                    });
-
-                    // exception thrown
-                    // id has temporary value
-                    // potential fix: get friend request from database, not from list
-
-                    context.Remove(friendRequest);
-                    context.SaveChanges();
 
                     if (accepted == false)
                     {
@@ -373,7 +354,7 @@ namespace Presentation
             }
         }
 
-        public static void AddFriendMenu(User loggedUser, IMediator mediator, AppDbContext context)
+        public static async void AddFriendMenu(int idUser, IMediator mediator)
         {
             int choice;
             string? choiceString;
@@ -394,66 +375,76 @@ namespace Presentation
                 {
                     Task<Unit> command = mediator.Send(new ValidateIdFriend
                     {
-                        LoggedUser = loggedUser,
+                        IdUser = idUser,
                         IdFriend = choice
                     });
 
                     if (command.IsFaulted) throw command.Exception;
 
-                    // before sending the friend request,
-                    // check if it doesn't already exist
+                    // somehow, someway, i need to use await here but i'm not sure how
 
-                    User friend = mediator.Send(new GetUserById { Id = choice }).Result;
-
-                    bool exists = mediator.Send(new CheckIfFriendRequestExists
+                    bool friendExists = mediator.Send(new CheckIfFriendExistsQuery
                     {
-                        LoggedUser = friend,
-                        Friend = loggedUser
+                        IDUser = idUser,
+                        IDFriend = choice
                     }).Result;
 
-                    if (!exists)
+                    if (friendExists)
                     {
-                        mediator.Send(new SendFriendRequest
-                        {
-                            LoggedUser = loggedUser,
-                            idFriend = choice
-                        });
-
-                        // database query
-
-                        context.Add(new FriendRequests
-                        {
-                            IDUser = choice,
-                            IDRequester = loggedUser.ID
-                        });
-                        context.SaveChanges();
+                        throw new UserInFriendsException(choice);
                     }
 
+                    bool friendRequestExists = mediator.Send(new CheckIfFriendRequestExistsQuery
+                    {
+                        IDUser = idUser,
+                        IDRequester = choice
+                    }).Result;
+
+                    if (!friendRequestExists)
+                    {
+                        await mediator.Send(new AddFriendRequestCommand
+                        {
+                            IDUser = idUser,
+                            IDRequester = choice
+                        });
+                    }
                     Console.WriteLine("Request sent successfully.\n");
                     break;
 
                 }
                 catch (AggregateException ex)
                 {
+                    Console.WriteLine("aaaaaaaaaaa");
                     Console.WriteLine(ex.InnerException.Message + "\n");
+                }
+                catch (UserInFriendsException ex)
+                {
+                    Console.WriteLine(ex.Message + "\n");
                 }
             }
         }
 
-        public static void WriteDeleteFriendsMenu(User loggedUser, IMediator mediator)
+        public static void WriteDeleteFriendsMenu(int idUser, IMediator mediator)
         {
-            foreach (var user in loggedUser.Friends)
+            List<Friends> friends = mediator.Send(new GetAllFriendsOfUserQuery
             {
-                int id = user.IDFriend;
-                string displayName = mediator.Send(new GetUserById { Id = id }).Result.DisplayName;
+                IDUser = idUser
+            }).Result;
 
-                Console.WriteLine($"{displayName} - {id}");
+            foreach (var friend in friends)
+            {
+                string displayName = mediator.Send(new GetUserByIdQuery
+                {
+                    Id = friend.IDFriend
+                }).Result.DisplayName;
+
+                Console.WriteLine($"{displayName} - {friend.IDFriend}");
             }
 
             Console.Write("\nIntroduce the ID of the person you want to delete: ");
         }
 
-        public static void DeleteFriendMenu(User loggedUser, IMediator mediator, AppDbContext context)
+        public static async void DeleteFriendMenu(int idUser, IMediator mediator)
         {
             int choice;
             string? choiceString;
@@ -461,7 +452,7 @@ namespace Presentation
             while (true)
             {
 
-                WriteDeleteFriendsMenu(loggedUser, mediator);
+                WriteDeleteFriendsMenu(idUser, mediator);
                 
                 choiceString = Console.ReadLine();
 
@@ -480,7 +471,7 @@ namespace Presentation
 
                     Task<Unit> command = mediator.Send(new ValidateIdFriend
                     {
-                        LoggedUser = loggedUser,
+                        IdUser = idUser,
                         IdFriend = choice
                     });
 
@@ -492,36 +483,11 @@ namespace Presentation
                 }
                 catch (UserInFriendsException)
                 {
-                    User friend = mediator.Send(new GetUserById
+                    await mediator.Send(new RemoveFriendCommand
                     {
-                        Id = choice
-                    }).Result;
-
-                    // save friend reference in order to be able to
-                    // delete from database
-
-                    Friends friend1 = mediator.Send(new GetFriendOfUser
-                    {
-                        User = loggedUser,
-                        Friend = friend
-                    }).Result;
-                    Friends friend2 = mediator.Send(new GetFriendOfUser
-                    {
-                        User = friend,
-                        Friend = loggedUser
-                    }).Result;
-
-                    mediator.Send(new RemoveFriend
-                    {
-                        LoggedUser = loggedUser,
-                        Friend = friend
+                        IDUser = idUser,
+                        IDFriend = choice
                     });
-
-                    // database query
-
-                    context.Remove(friend1);
-                    context.Remove(friend2);
-                    context.SaveChanges();
 
                     Console.WriteLine("Friend removed successfully.\n");
                     break;
@@ -533,27 +499,35 @@ namespace Presentation
             }
         }
         
-        public static void WriteFriendsMenu(User loggedUser, IMediator mediator)
+        public static void WriteFriendsMenu(List<Friends> friends, IMediator mediator)
         {
             Console.WriteLine("Friends:\n");
 
-            for (int i = 0; i < loggedUser.Friends.Count; i++)
+            for (int i = 0; i < friends.Count; i++)
             {
-                string displayName = mediator.Send(new GetUserById { Id = loggedUser.Friends[i].IDFriend }).Result.DisplayName;
+                string displayName = mediator.Send(new GetUserByIdQuery
+                {
+                    Id = friends[i].IDFriend
+                }).Result.DisplayName;
 
                 Console.WriteLine($"{i + 1}. {displayName}");
             }
             Console.Write("\nPick someone to send a message to: ");
         }
 
-        public static void FriendsMenu(User loggedUser, IMediator mediator, AppDbContext context)
+        public static void FriendsMenu(int idUser, IMediator mediator)
         {
             int choice;
             string? choiceString;
 
+            List<Friends> friends = mediator.Send(new GetAllFriendsOfUserQuery
+            {
+                IDUser = idUser
+            }).Result;
+
             while (true)
             {
-                WriteFriendsMenu(loggedUser, mediator);
+                WriteFriendsMenu(friends, mediator);
 
                 choiceString = Console.ReadLine();
 
@@ -564,12 +538,11 @@ namespace Presentation
                 choice = ConvertInputToInt(choiceString);
                 try
                 {
-                    int numberOfFriends = loggedUser.Friends.Count;
+                    int numberOfFriends = friends.Count;
 
                     if (CheckIfChoiceValid(choice, numberOfFriends))
                     {
-                        User friend = mediator.Send(new GetUserById { Id = loggedUser.Friends[choice - 1].IDFriend }).Result;
-                        MessagesMenu(loggedUser, friend, mediator, context);
+                        MessagesMenu(idUser, friends[choice - 1].IDFriend, mediator);
                     }
                 }
                 catch (NumberBetweenException ex)
@@ -579,20 +552,15 @@ namespace Presentation
             }
         }
 
-        public static void WriteMessagesBetweenTwoUsers(User user1, User user2, List<Message> messages)
+        public static void WriteMessagesBetweenTwoUsers(int idUser, int idFriend, List<Message> messages)
         {
-            int idUser1 = user1.ID;
-            int idUser2 = user2.ID;
-
-            Console.WriteLine($"{user2.DisplayName}:");
-
             foreach (Message message in messages)
             {
-                if (message.IDSender == idUser1 && message.IDReceiver == idUser2)
+                if (message.IDSender == idUser && message.IDReceiver == idFriend)
                 {
                     Console.WriteLine(string.Format("{0,70}", message.Text));
                 }
-                else if (message.IDSender == idUser2 && message.IDReceiver == idUser1)
+                else if (message.IDSender == idFriend && message.IDReceiver == idUser)
                 {
                     Console.WriteLine(message.Text);
                 }
@@ -600,19 +568,19 @@ namespace Presentation
             Console.Write("\n>: ");
         }
 
-        public static void MessagesMenu(User loggedUser, User friend, IMediator mediator, AppDbContext context)
+        public static async void MessagesMenu(int idUser, int idFriend, IMediator mediator)
         {
             string? sentMessage;
 
             while (true)
             {
-                List<Message> messages = mediator.Send(new GetMessagesBetweenTwoUsers
+                List<Message> messages = mediator.Send(new GetMessagesBetweenTwoUsersQuery
                 {
-                    IdSender = loggedUser.ID,
-                    IdReceiver = friend.ID
+                    idUser1 = idUser,
+                    idUser2 = idFriend
                 }).Result;
 
-                WriteMessagesBetweenTwoUsers(loggedUser, friend, messages);
+                WriteMessagesBetweenTwoUsers(idUser, idFriend, messages);
 
                 sentMessage = Console.ReadLine();
 
@@ -626,24 +594,12 @@ namespace Presentation
 
                     if (command.IsFaulted) throw command.Exception;
 
-                    mediator.Send(new AddMessage
+                    await mediator.Send(new AddMessageCommand
                     {
-                        Sender = loggedUser,
-                        Receiver = friend,
-                        Message = sentMessage
+                        IDSender = idUser,
+                        IDReceiver = idFriend,
+                        Text = sentMessage
                     });
-
-                    // query
-
-                    context.Add(new Message
-                    {
-                        IDSender = loggedUser.ID,
-                        IDReceiver = friend.ID,
-                        Text = sentMessage,
-                        DateTime = DateTime.UtcNow.ToString()
-                    });
-                    context.SaveChanges();
-
                 }
                 catch (AggregateException ex)
                 {
@@ -658,12 +614,6 @@ namespace Presentation
         
         static int Main(string[] args)
         {
-            //List<User> users = ManageData.Instance.GetItemsFromJson<List<User>>("users");
-            //List<Message> messages = ManageData.Instance.GetItemsFromJson<List<Message>>("messages");
-
-            // adapted domain classes to make relationships in ef core
-            // and now the json data is no longer compatible with the classes
-
             List<User> usersData = new List<User>
             {
                 new User
@@ -787,8 +737,6 @@ namespace Presentation
                     }                }
             };
 
-            var context = new AppDbContext();
-
             // add data to database
             
             /*context.Database.EnsureDeleted();
@@ -800,7 +748,7 @@ namespace Presentation
 
             context.SaveChanges();*/
 
-            var users = context.Users
+            /*var users = context.Users
                 .Select(x => new User
                 {
                     ID = x.ID,
@@ -822,17 +770,25 @@ namespace Presentation
                 {
                     messages.Add(message);
                 }
-            }
-
+            }*/
+            
             var services = new ServiceCollection()
                 .AddScoped<IUserRepository, InMemoryUserRepository>()
                 .AddScoped<IMessageRepository, InMemoryMessageRepository>()
+                .AddScoped<IAppDbContext, AppDbContext>()
                 .AddMediatR(typeof(IUserRepository))
                 .BuildServiceProvider();
 
+            // copied this from the website
+
+/*            services.AddDbContext<AppContext>(options =>
+                options.UseSqlServer(
+                    Configuration.GetConnectionString("DefaultConnection"),
+                    b => b.MigrationsAssembly(typeof(ApplicationContext).Assembly.FullName)));
+*/
             var mediator = services.GetRequiredService<IMediator>();
 
-            mediator.Send(new AddUsers
+            /*mediator.Send(new AddUsers
             {
                 Users = users
             });
@@ -842,15 +798,9 @@ namespace Presentation
             mediator.Send(new AddMessages
             {
                 Messages = messages
-            });
+            });*/
             
-            FirstMenu(mediator, context);
-
-            // json files
-            // no longer working bcs i changed domain classes
-
-            //ManageData.Instance.PutItemsIntoJson<List<User>>(users, "users");
-            //ManageData.Instance.PutItemsIntoJson<List<Message>>(messages, "messages");
+            FirstMenu(mediator);
 
             return 0;
         }
