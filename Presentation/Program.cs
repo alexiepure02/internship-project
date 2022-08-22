@@ -54,7 +54,7 @@ namespace Presentation
             Console.WriteLine("0. Exit");
             Console.Write("\nPick your choice: ");
         }
-        public static void FirstMenu(IMediator mediator)
+        public static async Task FirstMenu(IMediator mediator)
         {
             string choice;
 
@@ -69,26 +69,26 @@ namespace Presentation
                 if (choice == "0") break;
 
                 if (choice == "1")
-                    LoginMenu(mediator);
+                    await LoginMenu(mediator);
                 else if (choice == "2")
-                    RegisterMenu(mediator);
+                    await RegisterMenu(mediator);
                 else
                     Console.WriteLine("Pick between 1 and 2.\n");
             }
         }
 
-        public static User Login(IMediator mediator)
+        public static async Task<User> Login(IMediator mediator)
         {
             Console.Write("username: ");
             string? username = Console.ReadLine();
             Console.Write("password: ");
             string? password = Console.ReadLine();
 
-            User user = mediator.Send(new GetUserByAccountQuery
+            User user = (await mediator.Send(new GetUserByAccountQuery
             {
                 Username = username,
                 Password = password
-            }).Result;
+            }));
 
             // i have to check for null here because, if i check it in LoginMenu,
             // i lose the typed username, so i have to throw the exception here
@@ -96,7 +96,7 @@ namespace Presentation
             return user == null ? throw new UserNotFoundException(username) : user;
         }
 
-        public static void LoginMenu(IMediator mediator)
+        public static async Task LoginMenu(IMediator mediator)
         {
             User loggedUser;
 
@@ -106,11 +106,11 @@ namespace Presentation
             {
                 try
                 {
-                    loggedUser = Login(mediator);
+                    loggedUser = Login(mediator).Result;
                     
                     Console.Clear();
 
-                    PreFriendsMenu(loggedUser.ID, mediator);
+                    await PreFriendsMenu(loggedUser.ID, mediator);
                 }
                 catch (UserNotFoundException ex)
                 {
@@ -121,7 +121,7 @@ namespace Presentation
             }
         }
 
-        public static void RegisterMenu(IMediator mediator)
+        public static async Task RegisterMenu(IMediator mediator)
         {
             while (true)
             {
@@ -134,9 +134,7 @@ namespace Presentation
 
                 Console.Clear();
 
-                int numberOfUsers = mediator.Send(new GetAllUsersQuery()).Result.Count();
-
-                // int numberOfUsers = mediator.Send(new GetAllDisplayNames()).Result.Count();
+                int numberOfUsers = (await mediator.Send(new GetAllUsersQuery())).Count();
 
                 User user = new User
                 {
@@ -156,9 +154,7 @@ namespace Presentation
 
                 if (result == "all good")
                 {
-                    //mediator.Send(new AddUser { User = user });
-
-                    mediator.Send(new AddUserCommand
+                    await mediator.Send(new AddUserCommand
                     {
                         User = user
                     });
@@ -201,7 +197,7 @@ namespace Presentation
             Console.Write("\nPick your choice: ");
         }
 
-        public static void PreFriendsMenu(int idUser, IMediator mediator)
+        public static async Task PreFriendsMenu(int idUser, IMediator mediator)
         {
             int choice;
             string? choiceString;
@@ -225,16 +221,16 @@ namespace Presentation
                         switch (choice)
                         {
                             case 1:
-                                FriendsMenu(idUser, mediator);
+                                await FriendsMenu(idUser, mediator);
                                 break;
                             case 2:
-                                FriendRequestsMenu(idUser, mediator);
+                                await FriendRequestsMenu(idUser, mediator);
                                 break;
                             case 3:
-                                AddFriendMenu(idUser, mediator);
+                                await AddFriendMenu(idUser, mediator);
                                 break;
                             case 4:
-                                DeleteFriendMenu(idUser, mediator);
+                                await DeleteFriendMenu(idUser, mediator);
                                 break;
                             default:
                                 break;
@@ -254,22 +250,22 @@ namespace Presentation
             return choice[0] == '-' ? false: true;
         }
 
-        public static void WriteFriendRequestsMenu(int idUser, IMediator mediator)
+        public static async Task WriteFriendRequestsMenu(int idUser, IMediator mediator)
         {
 
             // get all friends of user query
 
-            List<FriendRequests> friendRequests = mediator.Send(new GetAllFriendRequestsOfUserQuery
+            List<FriendRequests> friendRequests = (await mediator.Send(new GetAllFriendRequestsOfUserQuery
             {
                 IDUser = idUser
-            }).Result;
+            }));
 
             foreach (var friendRequest in friendRequests)
             {
-                string displayName = mediator.Send(new GetUserByIdQuery
+                string displayName = (await mediator.Send(new GetUserByIdQuery
                 {
                     Id = friendRequest.IDRequester
-                }).Result.DisplayName;
+                })).DisplayName;
                 
                 //string displayName = mediator.Send(new GetUserById { Id = id}).Result.DisplayName;
                 
@@ -279,7 +275,7 @@ namespace Presentation
             Console.Write("\nType ID of user to accept or -ID to decline: ");
         }
 
-        public static async void FriendRequestsMenu(int idUser, IMediator mediator)
+        public static async Task FriendRequestsMenu(int idUser, IMediator mediator)
         {
             int choice;
             string? choiceString;
@@ -287,7 +283,7 @@ namespace Presentation
 
             while (true)
             {
-                WriteFriendRequestsMenu(idUser, mediator);
+                await WriteFriendRequestsMenu(idUser, mediator);
 
                 choiceString = Console.ReadLine();
 
@@ -315,11 +311,11 @@ namespace Presentation
 
                     if (command.IsFaulted) throw command.Exception;
 
-                    bool friendRequestExists = mediator.Send(new CheckIfFriendRequestExistsQuery
+                    bool friendRequestExists = (await mediator.Send(new CheckIfFriendRequestExistsQuery
                     {
                         IDUser = idUser,
                         IDRequester = choice
-                    }).Result;
+                    }));
 
                     if (!friendRequestExists)
                     {
@@ -354,7 +350,7 @@ namespace Presentation
             }
         }
 
-        public static async void AddFriendMenu(int idUser, IMediator mediator)
+        public static async Task AddFriendMenu(int idUser, IMediator mediator)
         {
             int choice;
             string? choiceString;
@@ -383,22 +379,22 @@ namespace Presentation
 
                     // somehow, someway, i need to use await here but i'm not sure how
 
-                    bool friendExists = mediator.Send(new CheckIfFriendExistsQuery
+                    bool friendExists = (await mediator.Send(new CheckIfFriendExistsQuery
                     {
                         IDUser = idUser,
                         IDFriend = choice
-                    }).Result;
+                    }));
 
                     if (friendExists)
                     {
                         throw new UserInFriendsException(choice);
                     }
 
-                    bool friendRequestExists = mediator.Send(new CheckIfFriendRequestExistsQuery
+                    bool friendRequestExists = (await mediator.Send(new CheckIfFriendRequestExistsQuery
                     {
                         IDUser = idUser,
                         IDRequester = choice
-                    }).Result;
+                    }));
 
                     if (!friendRequestExists)
                     {
@@ -414,7 +410,6 @@ namespace Presentation
                 }
                 catch (AggregateException ex)
                 {
-                    Console.WriteLine("aaaaaaaaaaa");
                     Console.WriteLine(ex.InnerException.Message + "\n");
                 }
                 catch (UserInFriendsException ex)
@@ -424,19 +419,19 @@ namespace Presentation
             }
         }
 
-        public static void WriteDeleteFriendsMenu(int idUser, IMediator mediator)
+        public static async Task WriteDeleteFriendsMenuAsync(int idUser, IMediator mediator)
         {
-            List<Friends> friends = mediator.Send(new GetAllFriendsOfUserQuery
+            List<Friends> friends = (await mediator.Send(new GetAllFriendsOfUserQuery
             {
                 IDUser = idUser
-            }).Result;
+            }));
 
             foreach (var friend in friends)
             {
-                string displayName = mediator.Send(new GetUserByIdQuery
+                string displayName = (await mediator.Send(new GetUserByIdQuery
                 {
                     Id = friend.IDFriend
-                }).Result.DisplayName;
+                })).DisplayName;
 
                 Console.WriteLine($"{displayName} - {friend.IDFriend}");
             }
@@ -444,7 +439,7 @@ namespace Presentation
             Console.Write("\nIntroduce the ID of the person you want to delete: ");
         }
 
-        public static async void DeleteFriendMenu(int idUser, IMediator mediator)
+        public static async Task DeleteFriendMenu(int idUser, IMediator mediator)
         {
             int choice;
             string? choiceString;
@@ -452,7 +447,7 @@ namespace Presentation
             while (true)
             {
 
-                WriteDeleteFriendsMenu(idUser, mediator);
+                await WriteDeleteFriendsMenuAsync(idUser, mediator);
                 
                 choiceString = Console.ReadLine();
 
@@ -499,35 +494,35 @@ namespace Presentation
             }
         }
         
-        public static void WriteFriendsMenu(List<Friends> friends, IMediator mediator)
+        public static async Task WriteFriendsMenu(List<Friends> friends, IMediator mediator)
         {
             Console.WriteLine("Friends:\n");
 
             for (int i = 0; i < friends.Count; i++)
             {
-                string displayName = mediator.Send(new GetUserByIdQuery
+                string displayName = (await mediator.Send(new GetUserByIdQuery
                 {
                     Id = friends[i].IDFriend
-                }).Result.DisplayName;
+                })).DisplayName;
 
                 Console.WriteLine($"{i + 1}. {displayName}");
             }
             Console.Write("\nPick someone to send a message to: ");
         }
 
-        public static void FriendsMenu(int idUser, IMediator mediator)
+        public static async Task FriendsMenu(int idUser, IMediator mediator)
         {
             int choice;
             string? choiceString;
 
-            List<Friends> friends = mediator.Send(new GetAllFriendsOfUserQuery
+            List<Friends> friends = (await mediator.Send(new GetAllFriendsOfUserQuery
             {
                 IDUser = idUser
-            }).Result;
+            }));
 
             while (true)
             {
-                WriteFriendsMenu(friends, mediator);
+                await WriteFriendsMenu(friends, mediator);
 
                 choiceString = Console.ReadLine();
 
@@ -568,17 +563,17 @@ namespace Presentation
             Console.Write("\n>: ");
         }
 
-        public static async void MessagesMenu(int idUser, int idFriend, IMediator mediator)
+        public static async Task MessagesMenu(int idUser, int idFriend, IMediator mediator)
         {
             string? sentMessage;
 
             while (true)
             {
-                List<Message> messages = mediator.Send(new GetMessagesBetweenTwoUsersQuery
+                List<Message> messages = (await mediator.Send(new GetMessagesBetweenTwoUsersQuery
                 {
                     idUser1 = idUser,
                     idUser2 = idFriend
-                }).Result;
+                }));
 
                 WriteMessagesBetweenTwoUsers(idUser, idFriend, messages);
 
@@ -612,7 +607,7 @@ namespace Presentation
             }
         }
         
-        static int Main(string[] args)
+        static async Task<int> Main(string[] args)
         {
             List<User> usersData = new List<User>
             {
@@ -738,7 +733,7 @@ namespace Presentation
             };
 
             // add data to database
-            
+
             /*context.Database.EnsureDeleted();
             context.Database.EnsureCreated();
 
@@ -771,11 +766,12 @@ namespace Presentation
                     messages.Add(message);
                 }
             }*/
-            
+
             var services = new ServiceCollection()
                 .AddScoped<IUserRepository, InMemoryUserRepository>()
                 .AddScoped<IMessageRepository, InMemoryMessageRepository>()
-                .AddScoped<IAppDbContext, AppDbContext>()
+                .AddDbContext<AppDbContext>() // unable to resolve ref to IAppDbContext
+                //.AddScoped<IAppDbContext, AppDbContext>()
                 .AddMediatR(typeof(IUserRepository))
                 .BuildServiceProvider();
 
@@ -800,7 +796,7 @@ namespace Presentation
                 Messages = messages
             });*/
             
-            FirstMenu(mediator);
+            await FirstMenu(mediator);
 
             return 0;
         }
