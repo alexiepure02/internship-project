@@ -4,11 +4,8 @@ namespace Application
 {
     public interface IMessageRepository
     {
-        void AddMessages(List<Message> messages);
-        List<Message> GetMessagesBetweenTwoUsers(int idSender, int idReceiver);
-        bool CheckProfanity(string message);
-        void CheckIfMessageValid(string message);
-        void AddMessage(User Sender, User Receiver, string message);
-        List<Message> GetMessages();
+        bool ValidateMessage(string message);
+        Task CreateMessageAsync(Message message);
+        Task<List<Message>> GetMessagesBetweenTwoUsersAsync(int idUser1, int idUser2);
     }
 }

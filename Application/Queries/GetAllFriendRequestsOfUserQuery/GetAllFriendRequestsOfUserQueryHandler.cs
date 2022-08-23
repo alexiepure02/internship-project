@@ -11,22 +11,16 @@ namespace Application.Queries.GetAllFriendRequestsOfUserQuery
 {
     internal class GetAllFriendRequestsOfUserQueryHandler : IRequestHandler<GetAllFriendRequestsOfUserQuery, List<FriendRequests>>
     {
-        private IAppDbContext _appDbContext;
+        private IUnitOfWork _unitOfWork;
 
-        public GetAllFriendRequestsOfUserQueryHandler(IAppDbContext appDbContext)
+        public GetAllFriendRequestsOfUserQueryHandler(IUnitOfWork unitOfWork)
         {
-            _appDbContext = appDbContext;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<List<FriendRequests>> Handle(GetAllFriendRequestsOfUserQuery info, CancellationToken cancellationToken)
         {
-            var friendRequests =  await _appDbContext.FriendRequests.Where(f => f.IDUser == info.IDUser).ToListAsync();
-
-            if (friendRequests == null)
-            {
-                return null;
-            }
-            return friendRequests;
+            return await _unitOfWork.UserRepository.GetAllFriendRequestsOfUserAsync(info.IDUser);
         }
     }
 }

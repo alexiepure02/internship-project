@@ -11,25 +11,16 @@ namespace Application.Queries.GetMessagesBetweenTwoUsersQuery
 {
     internal class GetMessagesBetweenTwoUsersQueryHandler : IRequestHandler<GetMessagesBetweenTwoUsersQuery, List<Message>>
     {
-        private IAppDbContext _appDbContext;
+        private IUnitOfWork _unitOfWork;
 
-        public GetMessagesBetweenTwoUsersQueryHandler(IAppDbContext appDbContext)
+        public GetMessagesBetweenTwoUsersQueryHandler(IUnitOfWork unitOfWork)
         {
-            _appDbContext = appDbContext;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<List<Message>> Handle(GetMessagesBetweenTwoUsersQuery info, CancellationToken cancellationToken)
         {
-            var messages = await _appDbContext.Messages
-                .Where(m => m.IDSender == info.idUser1 && m.IDReceiver == info.idUser2 ||
-                m.IDSender == info.idUser2 && m.IDReceiver == info.idUser1)
-                .ToListAsync();
-        
-            if (messages == null)
-            {
-                return null;
-            }
-            return messages.OrderBy(m => m.DateTime).ToList();
+            return await _unitOfWork.MessageRepository.GetMessagesBetweenTwoUsersAsync(info.IDUser1, info.IDUser2);
         }
     }
 }

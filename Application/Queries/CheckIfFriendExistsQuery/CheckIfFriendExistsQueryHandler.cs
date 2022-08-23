@@ -10,18 +10,16 @@ namespace Application.Queries.CheckIfFriendExistsQuery
 {
     public class CheckIfFriendExistsQueryHandler : IRequestHandler<CheckIfFriendExistsQuery, bool>
     {
-        private IAppDbContext _appDbContext;
+        private IUnitOfWork _unitOfWork;
 
-        public CheckIfFriendExistsQueryHandler(IAppDbContext appDbContext)
+        public CheckIfFriendExistsQueryHandler(IUnitOfWork unitOfWork)
         {
-            _appDbContext = appDbContext;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<bool> Handle(CheckIfFriendExistsQuery info, CancellationToken cancellationToken)
         {
-            var friend = await _appDbContext.Friends.Where(u => u.IDUser == info.IDUser && u.IDFriend == info.IDFriend).FirstOrDefaultAsync();
-
-            return friend != null;
+            return await _unitOfWork.UserRepository.CheckIfFriendExistsAsync(info.IDUser, info.IDFriend);
         }
     }
 }

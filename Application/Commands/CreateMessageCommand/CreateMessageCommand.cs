@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Commands.AddMessageCommand
+namespace Application.Commands.CreateMessageCommand
 {
-    public class AddMessageCommand : IRequest
+    public class CreateMessageCommand : IRequest<Message>
     {
         public int IDSender { get; set; }
         public int IDReceiver { get; set; }

@@ -6,11 +6,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.Commands.RemoveFriendCommand
+namespace Application.Commands.CreateFriendRequestCommand
 {
-    public class RemoveFriendCommand : IRequest
+    public class CreateFriendRequestCommand : IRequest<FriendRequests>
     {
         public int IDUser { get; set; }
-        public int IDFriend { get; set; }
+        public int IDRequester { get; set; }
     }
 }

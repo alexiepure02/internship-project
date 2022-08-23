@@ -11,22 +11,16 @@ namespace Application.Queries.GetAllFriendsOfUserQuery
 {
     public class GetAllFriendsOfUserQueryHandler : IRequestHandler<GetAllFriendsOfUserQuery, List<Friends>>
     {
-        private IAppDbContext _appDbContext;
+        private IUnitOfWork _unitOfWork;
 
-        public GetAllFriendsOfUserQueryHandler(IAppDbContext appDbContext)
+        public GetAllFriendsOfUserQueryHandler(IUnitOfWork unitOfWork)
         {
-            _appDbContext = appDbContext;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<List<Friends>> Handle(GetAllFriendsOfUserQuery info, CancellationToken cancellationToken)
         {
-            var friends = await _appDbContext.Friends.Where(f => f.IDUser == info.IDUser).ToListAsync();
-
-            if (friends == null)
-            {
-                return null;
-            }
-            return friends;
+            return await _unitOfWork.UserRepository.GetAllFriendsOfUserAsync(info.IDUser);
         }
     }
 }

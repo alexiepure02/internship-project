@@ -11,23 +11,16 @@ namespace Application.Queries.GetFriendOfUserQuery
 {
     public class GetFriendOfUserQueryHandler : IRequestHandler<GetFriendOfUserQuery, Friends>
     {
-        private IAppDbContext _appDbContext;
+        private IUnitOfWork _unitOfWork;
 
-        public GetFriendOfUserQueryHandler(IAppDbContext appDbContext)
+        public GetFriendOfUserQueryHandler(IUnitOfWork unitOfWork)
         {
-            _appDbContext = appDbContext;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<Friends> Handle(GetFriendOfUserQuery info, CancellationToken cancellationToken)
         {
-            var friend = await _appDbContext.Friends.Where(u => u.IDUser == info.IDUser && u.IDFriend == info.IDFriend).FirstOrDefaultAsync();
-
-            if (friend == null)
-            {
-                return null;
-            }
-
-            return friend;
+            return await _unitOfWork.UserRepository.GetFriendOfUserAsync(info.IDUser, info.IDFriend);
         }
     }
 }

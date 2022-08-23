@@ -11,22 +11,16 @@ namespace Application.Queries.GetUserByIdQuery
 {
     public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, User>
     {
-        private IAppDbContext _appDbContext;
+        private IUnitOfWork _unitOfWork;
 
-        public GetUserByIdQueryHandler(IAppDbContext appDbContext)
+        public GetUserByIdQueryHandler(IUnitOfWork unitOfWork)
         {
-            _appDbContext = appDbContext;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<User> Handle(GetUserByIdQuery info, CancellationToken cancellationToken)
         {
-            var user = await _appDbContext.Users.Where(u => u.ID == info.Id).FirstOrDefaultAsync();
-
-            if (user == null)
-            {
-                return null;
-            }
-            return user;
+            return await _unitOfWork.UserRepository.GetUserByIdAsync(info.IDUser);
         }
     }
 }

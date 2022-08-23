@@ -11,22 +11,16 @@ namespace Application.Queries.GetUserByAccountQuery
 {
     public class GetUserByAccountQueryHandler : IRequestHandler<GetUserByAccountQuery, User>
     {
-        private IAppDbContext _appDbContext;
+        private IUnitOfWork _unitOfWork;
 
-        public GetUserByAccountQueryHandler(IAppDbContext appDbContext)
+        public GetUserByAccountQueryHandler(IUnitOfWork unitOfWork)
         {
-            _appDbContext = appDbContext;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<User> Handle(GetUserByAccountQuery info, CancellationToken cancellationToken)
         {
-            var user = await _appDbContext.Users.Where(u => u.Username == info.Username && u.Password == info.Password).FirstOrDefaultAsync();
-
-            if (user == null)
-            {
-                return null;
-            }
-            return user;
+            return await _unitOfWork.UserRepository.GetUserByAccountAsync(info.Username, info.Password);
         }
     }
 }

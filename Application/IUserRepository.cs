@@ -9,22 +9,19 @@ namespace Application
 {
     public interface IUserRepository
     {
-        void AddUsers(List<User> users);
-        void AddUser(User user);
-        void RemoveUser(User user);
-        List<string> GetAllDisplayNames();
-        List<int> GetAllIds();
-        Friends GetFriendOfUser(User user, User friend);
-        FriendRequests GetFriendRequestOfUser(User user, User friend);
-        User GetUserByUsernameAndPassword(string username, string password);
-        User GetUserById(int id);
-        void UpdateFriendRequest(User loggedUser, User Friend, bool accepted);
-        void ValidateIdFriend(int idUser, int idFriend);
-        bool CheckIfFriendRequestExists(User loggedUser, User friend);
-        void SendFriendRequest(User loggedUser, int idFriend);
-        void RemoveFriend(User loggedUser, User Friend);
-        string ValidateNewUser(User user);
-        int GetUsersCount();
-        List<User> GetUsers();
+        bool ValidateNewUser(User user);
+        Task CreateUserAsync(User user);
+        Task CreateFriendRequestAsync(FriendRequests friendRequest);
+        Task UpdateFriendRequestAsync(FriendRequests friendRequest, bool accepted);
+        Task DeleteFriendAsync(Friends friend);
+        Task<bool> CheckIfFriendExistsAsync(int idUser, int idFriend);
+        Task<bool> CheckIfFriendRequestExistsAsync(int idUser, int idRequester);
+        Task<List<Friends>> GetAllFriendsOfUserAsync(int idUser);
+        Task<List<FriendRequests>> GetAllFriendRequestsOfUserAsync(int idUser);
+        Task<List<User>> GetAllUsersAsync();
+        Task<Friends> GetFriendOfUserAsync(int idUser, int idFriend);
+        Task<FriendRequests> GetFriendRequestOfUserAsync(int idUser, int idRequester);
+        Task<User> GetUserByAccountAsync(string username, string password);
+        Task<User> GetUserByIdAsync(int idUser);
     }
 }

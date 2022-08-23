@@ -10,7 +10,7 @@ namespace Application.Queries.GetMessagesBetweenTwoUsersQuery
 {
     public class GetMessagesBetweenTwoUsersQuery : IRequest<List<Message>>
     {
-        public int idUser1 { get; set; }
-        public int idUser2 { get; set; }
+        public int IDUser1 { get; set; }
+        public int IDUser2 { get; set; }
     }
 }

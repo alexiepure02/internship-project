@@ -11,22 +11,16 @@ namespace Application.Queries.GetAllUsersQuery
 {
     public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, List<User>>
     {
-        private IAppDbContext _appDbContext;
+        private IUnitOfWork _unitOfWork;
 
-        public GetAllUsersQueryHandler(IAppDbContext appDbContext)
+        public GetAllUsersQueryHandler(IUnitOfWork unitOfWork)
         {
-            _appDbContext = appDbContext;
+            _unitOfWork = unitOfWork;
         }
 
         public async Task<List<User>> Handle(GetAllUsersQuery request, CancellationToken cancellationToken)
         {
-            var users = await _appDbContext.Users.ToListAsync();
-        
-            if (users == null)
-            {
-                return null;
-            }
-            return users;
+            return await _unitOfWork.UserRepository.GetAllUsersAsync();
         }
     }
 }
