@@ -41,7 +41,7 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("IDUser");
 
-                    b.ToTable("FriendsRequests");
+                    b.ToTable("FriendRequests");
                 });
 
             modelBuilder.Entity("Domain.Friends", b =>

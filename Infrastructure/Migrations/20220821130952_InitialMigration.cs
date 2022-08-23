@@ -49,7 +49,7 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "FriendsRequests",
+                name: "FriendRequests",
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "int", nullable: false)
@@ -59,15 +59,15 @@ namespace Infrastructure.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FriendsRequests", x => x.ID);
+                    table.PrimaryKey("PK_FriendRequests", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_FriendsRequests_Users_IDRequester",
+                        name: "FK_FriendRequests_Users_IDRequester",
                         column: x => x.IDRequester,
                         principalTable: "Users",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_FriendsRequests_Users_IDUser",
+                        name: "FK_FriendRequests_Users_IDUser",
                         column: x => x.IDUser,
                         principalTable: "Users",
                         principalColumn: "ID",
@@ -113,13 +113,13 @@ namespace Infrastructure.Migrations
                 column: "IDUser");
 
             migrationBuilder.CreateIndex(
-                name: "IX_FriendsRequests_IDRequester",
-                table: "FriendsRequests",
+                name: "IX_FriendRequests_IDRequester",
+                table: "FriendRequests",
                 column: "IDRequester");
 
             migrationBuilder.CreateIndex(
-                name: "IX_FriendsRequests_IDUser",
-                table: "FriendsRequests",
+                name: "IX_FriendRequests_IDUser",
+                table: "FriendRequests",
                 column: "IDUser");
 
             migrationBuilder.CreateIndex(
@@ -139,7 +139,7 @@ namespace Infrastructure.Migrations
                 name: "Friends");
 
             migrationBuilder.DropTable(
-                name: "FriendsRequests");
+                name: "FriendRequests");
 
             migrationBuilder.DropTable(
                 name: "Messages");
