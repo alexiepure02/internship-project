@@ -41,12 +41,20 @@ namespace Infrastructure
 
         public async Task CreateFriendRequestAsync(FriendRequests friendRequest)
         {
-            await _context.FriendRequests.AddAsync(friendRequest);
+            var friendRequestDB = await _context.FriendRequests.Where(f => f.IDUser == friendRequest.IDUser && f.IDRequester == friendRequest.IDRequester).FirstOrDefaultAsync();
+
+            if (friendRequestDB == null)
+                await _context.FriendRequests.AddAsync(friendRequest);
         }
 
         public async Task UpdateFriendRequestAsync(FriendRequests friendRequest, bool accepted)
         {
+            // if both users sent friend requests to eachother,
+            // the database will have 2 instances,
+            // so you'll have to remove both of them
+
             var friendRequestDB = await _context.FriendRequests.Where(f => f.IDUser == friendRequest.IDUser && f.IDRequester == friendRequest.IDRequester).FirstOrDefaultAsync();
+            var friendRequestDBReverse = await _context.FriendRequests.Where(f => f.IDUser == friendRequest.IDRequester && f.IDRequester == friendRequest.IDUser).FirstOrDefaultAsync();
 
             if (friendRequestDB != null)
             {
@@ -66,6 +74,10 @@ namespace Infrastructure
                 }
 
                 _context.FriendRequests.Remove(friendRequestDB);
+                if (friendRequestDBReverse != null)
+                {
+                    _context.FriendRequests.Remove(friendRequestDBReverse);
+                }
             }
             else
                 throw new InvalidFriendRequestException();
@@ -86,20 +98,6 @@ namespace Infrastructure
                 _context.Friends.Remove(friend1);
                 _context.Friends.Remove(friend2);
             }
-        }
-
-        public async Task<bool> CheckIfFriendExistsAsync(int idUser, int idFriend)
-        {
-            var friend = await _context.Friends.Where(u => u.IDUser == idUser && u.IDFriend == idFriend).FirstOrDefaultAsync();
-
-            return friend != null;
-        }
-
-        public async Task<bool> CheckIfFriendRequestExistsAsync(int idUser, int idRequester)
-        {
-            var friendRequest = await _context.FriendRequests.Where(u => u.IDUser == idUser && u.IDRequester == idRequester).FirstOrDefaultAsync();
-
-            return friendRequest != null;
         }
 
         public async Task<List<Friends>> GetAllFriendsOfUserAsync(int idUser)
