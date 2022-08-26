@@ -57,5 +57,17 @@ namespace Infrastructure
             }
             return messages.OrderBy(m => m.DateTime).ToList();
         }
+
+        public async Task<Message> GetMessageByIdAsync(int id)
+        {
+            var message = await _context.Messages
+                .Where(m => m.ID == id).FirstOrDefaultAsync();
+
+            if (message == null)
+            {
+                return null;
+            }
+            return message;
+        }
     }
 }

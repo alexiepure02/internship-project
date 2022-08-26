@@ -7,5 +7,6 @@ namespace Application
         bool ValidateMessage(string message);
         Task CreateMessageAsync(Message message);
         Task<List<Message>> GetMessagesBetweenTwoUsersAsync(int idUser1, int idUser2);
+        Task<Message> GetMessageByIdAsync(int id);
     }
 }

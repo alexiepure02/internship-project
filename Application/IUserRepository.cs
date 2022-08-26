@@ -19,6 +19,7 @@ namespace Application
         Task<List<User>> GetAllUsersAsync();
         Task<Friends> GetFriendOfUserAsync(int idUser, int idFriend);
         Task<FriendRequests> GetFriendRequestOfUserAsync(int idUser, int idRequester);
+        Task<FriendRequests> GetFriendRequestByIdAsync(int id);
         Task<User> GetUserByAccountAsync(string username, string password);
         Task<User> GetUserByIdAsync(int idUser);
     }

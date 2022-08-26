@@ -21,7 +21,6 @@ namespace Application.Commands.CreateUserCommand
         {
             var user = new User
             {
-                ID = info.ID,
                 Username = info.Username,
                 Password = info.Password,
                 DisplayName = info.DisplayName

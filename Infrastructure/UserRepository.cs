@@ -21,11 +21,11 @@ namespace Infrastructure
 
         public bool ValidateNewUser(User user)
         {
-            if (user.Username.Length > 50)
+            if (user.Username.Length < 5 && user.Username.Length > 50)
                 return false;// "Length of username exceeds limit. (50)";
-            if (user.Password.Length > 50)
+            if (user.Username.Length < 5 && user.Password.Length > 50)
                 return false;// "Length of password exceeds limit. (50)";
-            if (user.DisplayName.Length > 50)
+            if (user.DisplayName.Length < 5 && user.DisplayName.Length > 50)
                 return false;// "Length of display name exceeds limit. (50)";
 
             return true;
@@ -157,6 +157,17 @@ namespace Infrastructure
             return friendRequest;
         }
 
+        public async Task<FriendRequests> GetFriendRequestByIdAsync(int id)
+        {
+            var friendRequest = await _context.FriendRequests.Where(u => u.ID == id).FirstOrDefaultAsync();
+
+            if (friendRequest == null)
+            {
+                return null;
+            }
+
+            return friendRequest;
+        }
         public async Task<User> GetUserByAccountAsync(string username, string password)
         {
             var user = await _context.Users.Where(u => u.Username == username && u.Password == password).FirstOrDefaultAsync();
