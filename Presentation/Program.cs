@@ -199,26 +199,30 @@ namespace Presentation
                         DisplayUser(loggedUser);
                         break;
                     case 2:
+                        var createdUser = await Register(mediator);
+                        DisplayUser(createdUser);
+                        break;
+                    case 3:
                         var friendsList = await GetFriendsOfUser(mediator);
                         DisplayFriendsList(friendsList);
                         break;
-                    case 3:
+                    case 4:
                         var friendRequestsList = await GetFriendRequestsOfUser(mediator);
                         DisplayFriendRequestsList(friendRequestsList);
                         break;
-                    case 4:
+                    case 5:
                         var sentRequest = await SendFriendRequest(mediator);
                         DisplayFriendRequest(sentRequest);
                         break;
-                    case 5:
+                    case 6:
                         var friendRequest = await UpdateFriendRequest(mediator);
                         DisplayFriendRequest(friendRequest);
                         break;
-                    case 6:
+                    case 7:
                         var deletedFriend = await DeleteFriend(mediator);
                         DisplayFriend(deletedFriend);
                         break;
-                    case 7:
+                    case 8:
                         Console.WriteLine("Insert idUser1");
                         int idUser1 = Convert.ToInt32(Console.ReadLine());
                         Console.WriteLine("Insert idUser2");
@@ -226,7 +230,7 @@ namespace Presentation
                         var messages = await GetMessages(mediator, idUser1, idUser2);
                         DisplayMessages(messages, idUser1, idUser2);
                         break;
-                    case 8:
+                    case 9:
                         var createdMessage = await CreateMessage(mediator);
                         DisplayMessage(createdMessage);
                         break;
@@ -256,6 +260,19 @@ namespace Presentation
             Console.WriteLine($"Username: {user.Username}");
             Console.WriteLine($"Password: {user.Password}");
             Console.WriteLine($"DisplayName: {user.DisplayName}");
+        }
+
+        public static async Task<User> Register(IMediator mediator)
+        {
+            var command = new CreateUserCommand();
+            Console.WriteLine($"Insert {nameof(command.Username)}");
+            command.Username = Console.ReadLine();
+            Console.WriteLine($"Insert {nameof(command.Password)}");
+            command.Password = Console.ReadLine();
+            Console.WriteLine($"Insert {nameof(command.DisplayName)}");
+            command.Username = Console.ReadLine();
+
+            return await mediator.Send(command);
         }
 
         public static async Task<List<Friends>> GetFriendsOfUser(IMediator mediator)
