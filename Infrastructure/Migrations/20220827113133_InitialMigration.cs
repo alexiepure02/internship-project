@@ -12,7 +12,8 @@ namespace Infrastructure.Migrations
                 name: "Users",
                 columns: table => new
                 {
-                    ID = table.Column<int>(type: "int", nullable: false),
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
                     Username = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Password = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     DisplayName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
@@ -20,32 +21,6 @@ namespace Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.ID);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Friends",
-                columns: table => new
-                {
-                    ID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    IDUser = table.Column<int>(type: "int", nullable: false),
-                    IDFriend = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Friends", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_Friends_Users_IDFriend",
-                        column: x => x.IDFriend,
-                        principalTable: "Users",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_Friends_Users_IDUser",
-                        column: x => x.IDUser,
-                        principalTable: "Users",
-                        principalColumn: "ID",
-                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -72,6 +47,32 @@ namespace Infrastructure.Migrations
                         principalTable: "Users",
                         principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Friends",
+                columns: table => new
+                {
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    IDUser = table.Column<int>(type: "int", nullable: false),
+                    IDFriend = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Friends", x => x.ID);
+                    table.ForeignKey(
+                        name: "FK_Friends_Users_IDFriend",
+                        column: x => x.IDFriend,
+                        principalTable: "Users",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Friends_Users_IDUser",
+                        column: x => x.IDUser,
+                        principalTable: "Users",
+                        principalColumn: "ID",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -103,16 +104,6 @@ namespace Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Friends_IDFriend",
-                table: "Friends",
-                column: "IDFriend");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Friends_IDUser",
-                table: "Friends",
-                column: "IDUser");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_FriendRequests_IDRequester",
                 table: "FriendRequests",
                 column: "IDRequester");
@@ -120,6 +111,16 @@ namespace Infrastructure.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_FriendRequests_IDUser",
                 table: "FriendRequests",
+                column: "IDUser");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Friends_IDFriend",
+                table: "Friends",
+                column: "IDFriend");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Friends_IDUser",
+                table: "Friends",
                 column: "IDUser");
 
             migrationBuilder.CreateIndex(
@@ -136,10 +137,10 @@ namespace Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Friends");
+                name: "FriendRequests");
 
             migrationBuilder.DropTable(
-                name: "FriendRequests");
+                name: "Friends");
 
             migrationBuilder.DropTable(
                 name: "Messages");

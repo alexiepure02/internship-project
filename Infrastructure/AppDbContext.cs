@@ -25,10 +25,6 @@ namespace Infrastructure
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // user id 
-
-            modelBuilder.Entity<User>().Property(u => u.ID).ValueGeneratedNever();
-
             // many-to-many friends
 
             modelBuilder.Entity<Friends>()
