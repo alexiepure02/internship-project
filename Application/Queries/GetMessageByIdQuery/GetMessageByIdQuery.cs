@@ -10,6 +10,6 @@ namespace Application.Queries.GetMessageByIdQuery
 {
     public class GetMessageByIdQuery : IRequest<Message>
     {
-        public int ID { get; set; }
+        public int IDMessage { get; set; }
     }
 }

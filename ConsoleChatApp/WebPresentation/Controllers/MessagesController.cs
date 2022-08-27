@@ -26,12 +26,17 @@ namespace WebPresentation.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateMessage([FromBody] MessagePutPostDto product)
         {
-            var command = _mapper.Map<CreateMessageCommand>(product);
+            var command = new CreateMessageCommand
+            {
+                IDSender = product.IDSender,
+                IDReceiver = product.IDReceiver,
+                Text = product.Text
+            };
 
-            var created = await _mediator.Send(command);
-            var dto = _mapper.Map<MessageGetDto>(created);
+            var result = await _mediator.Send(command);
+            var mappedResult = _mapper.Map<MessageGetDto>(result);
 
-            return CreatedAtAction(nameof(GetMessages), new { messageId = created.ID }, dto);
+            return CreatedAtAction(nameof(GetById), new { id = mappedResult.ID }, mappedResult);
         }
 
         [HttpGet]
@@ -48,8 +53,12 @@ namespace WebPresentation.Controllers
         [Route("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
-            var query = new GetMessageByIdQuery { ID = id };
+            var query = new GetMessageByIdQuery { IDMessage = id };
             var result = await _mediator.Send(query);
+
+            if (result == null)
+                return NotFound();
+
             var mappedResult = _mapper.Map<MessageGetDto>(result);
             return Ok(mappedResult);
         }

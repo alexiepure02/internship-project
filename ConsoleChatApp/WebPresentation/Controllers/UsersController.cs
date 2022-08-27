@@ -62,9 +62,9 @@ namespace WebPresentation.Controllers
 
         [HttpGet]
         [Route("{username}/{password}")]
-        public async Task<IActionResult> GetByAccount(string Username, string Password)
+        public async Task<IActionResult> GetByAccount(string username, string password)
         {
-            var query = new GetUserByAccountQuery { Username = Username, Password = Password };
+            var query = new GetUserByAccountQuery { Username = username, Password = password };
             var result = await _mediator.Send(query);
 
             if (result == null)

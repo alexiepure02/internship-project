@@ -19,7 +19,7 @@ namespace Application.Queries.GetMessageByIdQuery
 
         public async Task<Message> Handle(GetMessageByIdQuery info, CancellationToken cancellationToken)
         {
-            return await _unitOfWork.MessageRepository.GetMessageByIdAsync(info.ID);
+            return await _unitOfWork.MessageRepository.GetMessageByIdAsync(info.IDMessage);
         }
     }
 }

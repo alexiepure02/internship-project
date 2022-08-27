@@ -49,12 +49,9 @@ namespace Infrastructure
 
         public async Task UpdateFriendRequestAsync(FriendRequests friendRequest, bool accepted)
         {
-            // if both users sent friend requests to eachother,
-            // the database will have 2 instances,
-            // so you'll have to remove both of them
+            // replace where with include
 
             var friendRequestDB = await _context.FriendRequests.Where(f => f.IDUser == friendRequest.IDUser && f.IDRequester == friendRequest.IDRequester).FirstOrDefaultAsync();
-            var friendRequestDBReverse = await _context.FriendRequests.Where(f => f.IDUser == friendRequest.IDRequester && f.IDRequester == friendRequest.IDUser).FirstOrDefaultAsync();
 
             if (friendRequestDB != null)
             {
@@ -74,6 +71,12 @@ namespace Infrastructure
                 }
 
                 _context.FriendRequests.Remove(friendRequestDB);
+
+                // if both users sent friend requests to eachother,
+                // the database will have 2 instances,
+                // so you'll have to remove both of them
+
+                var friendRequestDBReverse = await _context.FriendRequests.Where(f => f.IDUser == friendRequest.IDRequester && f.IDRequester == friendRequest.IDUser).FirstOrDefaultAsync();
                 if (friendRequestDBReverse != null)
                 {
                     _context.FriendRequests.Remove(friendRequestDBReverse);

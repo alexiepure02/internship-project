@@ -28,19 +28,23 @@ namespace WebPresentation.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateFriendRequest([FromBody] FriendRequestPutPostDto friendRequest)
         {
-            var command = _mapper.Map<CreateFriendRequestCommand>(friendRequest);
+            var command = new CreateFriendRequestCommand
+            {
+                IDUser = friendRequest.IDUser,
+                IDRequester = friendRequest.IDRequester
+            };
 
-            var created = await _mediator.Send(command);
-            var dto = _mapper.Map<FriendRequestGetDto>(created);
+            var result = await _mediator.Send(command);
+            var mappedResult = _mapper.Map<FriendRequestGetDto>(result);
 
-            return CreatedAtAction(nameof(GetById), new { friendRequestId = created.ID }, dto);
+            return CreatedAtAction(nameof(GetById), new { id = mappedResult.ID }, mappedResult);
         }
 
         [HttpGet]
-        [Route("{idUser}")]
-        public async Task<IActionResult> GetAllFriendRequestsOfUser(int id)
+        [Route("{idUser}/getAllFriendRequests")]
+        public async Task<IActionResult> GetAllFriendRequestsOfUser(int idUser)
         {
-            var query = new GetAllFriendRequestsOfUserQuery { IDUser = id };
+            var query = new GetAllFriendRequestsOfUserQuery { IDUser = idUser };
             var result = await _mediator.Send(query);
             var mappedResult = _mapper.Map<List<FriendRequestGetDto>>(result);
             return Ok(mappedResult);

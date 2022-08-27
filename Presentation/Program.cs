@@ -27,7 +27,7 @@ namespace Presentation
         {
             var services = new ServiceCollection()
                 .AddDbContext<AppDbContext>(options =>
-                options.UseSqlServer(@"Data Source=IEPURE\SQLEXPRESS;DataBase=InternshipProjectDb;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False"))
+                options.UseSqlServer(@"Data Source=IEPURE\SQLEXPRESS;DataBase=ChatAppDb;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=False;ApplicationIntent=ReadWrite;MultiSubnetFailover=False"))
                 .AddMediatR(typeof(IUserRepository))
                 .AddScoped<IUnitOfWork, UnitOfWork>()
                 .AddScoped<IUserRepository, UserRepository>()
@@ -179,13 +179,14 @@ namespace Presentation
             {
                 Console.WriteLine();
                 Console.WriteLine("1. Login");
-                Console.WriteLine("2. Friends list");
-                Console.WriteLine("3. Friend requests list");
-                Console.WriteLine("4. Send friend request");
-                Console.WriteLine("5. Update friend request");
-                Console.WriteLine("6. Delete friend");
-                Console.WriteLine("7. Messages with a friend");
-                Console.WriteLine("8. Send message to friend");
+                Console.WriteLine("2. Register");
+                Console.WriteLine("3. Friends list");
+                Console.WriteLine("4. Friend requests list");
+                Console.WriteLine("5. Send friend request");
+                Console.WriteLine("6. Update friend request");
+                Console.WriteLine("7. Delete friend");
+                Console.WriteLine("8. Messages with a friend");
+                Console.WriteLine("9. Send message to friend");
                 Console.WriteLine();
                 Console.Write("Insert action: ");
                 var action = Convert.ToInt32(Console.ReadLine());
