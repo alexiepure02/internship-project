@@ -1,8 +1,12 @@
 using Application;
 using Application.Commands.CreateUserCommand;
 using Infrastructure;
+using JavaScriptEngineSwitcher.Extensions.MsDependencyInjection;
+using JavaScriptEngineSwitcher.V8;
 using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using React.AspNet;
 using WebPresentation;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +27,10 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddMediatR(typeof(CreateUserCommand));
 builder.Services.AddAutoMapper(typeof(AssemblyMarketPresentatio));
 
+builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+builder.Services.AddReact();
+builder.Services.AddJsEngineSwitcher(options => options.DefaultEngineName = V8JsEngine.EngineName).AddV8();
+//builder.Services.AddControllersWithViews().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

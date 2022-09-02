@@ -37,7 +37,10 @@ namespace WebPresentation.Controllers
             var result = await _mediator.Send(command);
             var mappedResult = _mapper.Map<FriendRequestGetDto>(result);
 
-            return CreatedAtAction(nameof(GetById), new { id = mappedResult.ID }, mappedResult);
+            if (mappedResult.ID == 0)
+                return BadRequest(mappedResult);
+            else
+                return CreatedAtAction(nameof(GetById), new { id = mappedResult.ID }, mappedResult);
         }
 
         [HttpGet]

@@ -5,6 +5,7 @@ namespace Domain
     public class Message
     {
         public int ID { get; set; }
+
         [ForeignKey(nameof(IDSender))]
         public int IDSender { get; set; }
         public User Sender { get; set; }

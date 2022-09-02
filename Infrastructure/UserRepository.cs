@@ -41,7 +41,9 @@ namespace Infrastructure
 
         public async Task CreateFriendRequestAsync(FriendRequests friendRequest)
         {
-            var friendRequestDB = await _context.FriendRequests.Where(f => f.IDUser == friendRequest.IDUser && f.IDRequester == friendRequest.IDRequester).FirstOrDefaultAsync();
+            //var friendRequestDB = await _context.FriendRequests.Where(f => f.IDUser == friendRequest.IDUser && f.IDRequester == friendRequest.IDRequester).FirstOrDefaultAsync();
+
+            var friendRequestDB = await _context.FriendRequests.SingleOrDefaultAsync(f => f.IDUser == friendRequest.IDUser && f.IDRequester == friendRequest.IDRequester);
 
             if (friendRequestDB == null)
                 await _context.FriendRequests.AddAsync(friendRequest);
@@ -51,7 +53,9 @@ namespace Infrastructure
         {
             // replace where with include
 
-            var friendRequestDB = await _context.FriendRequests.Where(f => f.IDUser == friendRequest.IDUser && f.IDRequester == friendRequest.IDRequester).FirstOrDefaultAsync();
+            //var friendRequestDB = await _context.FriendRequests.Where(f => f.IDUser == friendRequest.IDUser && f.IDRequester == friendRequest.IDRequester).FirstOrDefaultAsync();
+
+            var friendRequestDB = await _context.FriendRequests.SingleOrDefaultAsync(f => f.IDUser == friendRequest.IDUser && f.IDRequester == friendRequest.IDRequester);
 
             if (friendRequestDB != null)
             {

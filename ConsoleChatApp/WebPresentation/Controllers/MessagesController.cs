@@ -17,7 +17,7 @@ namespace WebPresentation.Controllers
 
         // add DataAnnotations
 
-        public MessagesController(IMediator mediator, IMapper mapper)
+        public MessagesController(IMapper mapper, IMediator mediator)
         {
             _mediator = mediator;
             _mapper = mapper;
