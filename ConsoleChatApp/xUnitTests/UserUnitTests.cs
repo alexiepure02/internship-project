@@ -2,11 +2,13 @@ using Application.Queries.GetAllUsersQuery;
 using Application.Queries.GetUserByAccountQuery;
 using Application.Queries.GetUserByIdQuery;
 using AutoMapper;
+using Castle.Core.Logging;
 using Domain;
 using Domain.Exceptions;
 using Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using System.Net;
 using WebPresentation.Controllers;
@@ -18,6 +20,7 @@ namespace xUnitTests
     {
         private readonly Mock<IMediator> _mediator = new Mock<IMediator>();
         private readonly Mock<IMapper> _mapper = new Mock<IMapper>();
+        private readonly Mock<ILogger<UsersController>> _logger = new Mock<ILogger<UsersController>>();
 
         [Fact]
         public async Task Get_All_Users_GetAllUsersQueryIsCalled()
@@ -26,7 +29,7 @@ namespace xUnitTests
                 .Setup(m => m.Send(It.IsAny<GetAllUsersQuery>(), It.IsAny<CancellationToken>()))
                 .Verifiable();
 
-            var controller = new UsersController(_mapper.Object, _mediator.Object);
+            var controller = new UsersController(_mapper.Object, _mediator.Object, _logger.Object);
             await controller.GetUsers();
 
             _mediator.Verify(x => x.Send(It.IsAny<GetAllUsersQuery>(), It.IsAny<CancellationToken>()), Times.Once());
@@ -39,7 +42,7 @@ namespace xUnitTests
                 .Setup(m => m.Send(It.IsAny<GetUserByIdQuery>(), It.IsAny<CancellationToken>()))
                 .Verifiable();
 
-            var controller = new UsersController(_mapper.Object, _mediator.Object);
+            var controller = new UsersController(_mapper.Object, _mediator.Object, _logger.Object);
             await controller.GetById(1);
 
             _mediator.Verify(x => x.Send(It.IsAny<GetUserByIdQuery>(), It.IsAny<CancellationToken>()), Times.Once());
@@ -65,7 +68,7 @@ namespace xUnitTests
                         });
                 });
 
-            var controller = new UsersController(_mapper.Object, _mediator.Object);
+            var controller = new UsersController(_mapper.Object, _mediator.Object, _logger.Object);
             await controller.GetById(1);
 
             Assert.Equal(1, userId);
@@ -85,7 +88,7 @@ namespace xUnitTests
                         DisplayName = "Dummy"
                     });
 
-            var controller = new UsersController(_mapper.Object, _mediator.Object);
+            var controller = new UsersController(_mapper.Object, _mediator.Object, _logger.Object);
             var result = await controller.GetById(1);
 
             var okResult = result as OkObjectResult;
@@ -126,7 +129,7 @@ namespace xUnitTests
                 .Setup(m => m.Send(It.IsAny<GetUserByIdQuery>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(user);
 
-            var controller = new UsersController(_mapper.Object, _mediator.Object);
+            var controller = new UsersController(_mapper.Object, _mediator.Object, _logger.Object);
             var result = await controller.GetById(1);
 
             var okResult = result as OkObjectResult;
@@ -141,7 +144,7 @@ namespace xUnitTests
                 .Setup(m => m.Send(It.IsAny<GetUserByAccountQuery>(), It.IsAny<CancellationToken>()))
                 .Verifiable();
 
-            var controller = new UsersController(_mapper.Object, _mediator.Object);
+            var controller = new UsersController(_mapper.Object, _mediator.Object, _logger.Object);
             await controller.GetByAccount("dummyUsername", "dummyPassword");
 
             _mediator.Verify(x => x.Send(It.IsAny<GetUserByAccountQuery>(), It.IsAny<CancellationToken>()), Times.Once());
@@ -169,7 +172,7 @@ namespace xUnitTests
                         });
                 });
 
-            var controller = new UsersController(_mapper.Object, _mediator.Object);
+            var controller = new UsersController(_mapper.Object, _mediator.Object, _logger.Object);
             await controller.GetByAccount("dummyUsername", "dummyPassword");
 
             Assert.Equal("dummyUsername", username);
@@ -201,7 +204,7 @@ namespace xUnitTests
                     DisplayName = src.DisplayName
                 });
 
-            var controller = new UsersController(_mapper.Object, _mediator.Object);
+            var controller = new UsersController(_mapper.Object, _mediator.Object, _logger.Object);
             var result = await controller.GetByAccount("dummyUsername", "dummyPassword");
 
             var okResult = result as OkObjectResult;
@@ -242,7 +245,7 @@ namespace xUnitTests
                 .Setup(m => m.Send(It.IsAny<GetUserByAccountQuery>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(user);
 
-            var controller = new UsersController(_mapper.Object, _mediator.Object);
+            var controller = new UsersController(_mapper.Object, _mediator.Object, _logger.Object);
             var result = await controller.GetByAccount("dummyUsername", "dummyPassword");
 
             var okResult = result as OkObjectResult;

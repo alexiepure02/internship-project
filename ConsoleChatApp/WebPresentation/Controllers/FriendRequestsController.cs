@@ -16,40 +16,47 @@ namespace WebPresentation.Controllers
     {
         private readonly IMediator _mediator;
         private readonly IMapper _mapper;
+        private readonly ILogger<FriendRequestsController> _logger;
 
-        // add DataAnnotations
-
-        public FriendRequestsController(IMediator mediator, IMapper mapper)
+        public FriendRequestsController(IMediator mediator, IMapper mapper, ILogger<FriendRequestsController> logger)
         {
             _mediator = mediator;
             _mapper = mapper;
+            _logger = logger;
         }
 
         [HttpPost]
         public async Task<IActionResult> CreateFriendRequest([FromBody] FriendRequestPutPostDto friendRequest)
         {
+            _logger.LogInformation("Creating create friend request command... ");
             var command = new CreateFriendRequestCommand
             {
                 IDUser = friendRequest.IDUser,
                 IDRequester = friendRequest.IDRequester
             };
 
+            _logger.LogInformation("Calling create friend request command using mediator... ");
             var result = await _mediator.Send(command);
+
+            _logger.LogInformation("Mapping result object to Dto objecct... ");
             var mappedResult = _mapper.Map<FriendRequestGetDto>(result);
 
-            if (mappedResult.ID == 0)
-                return BadRequest(mappedResult);
-            else
-                return CreatedAtAction(nameof(GetById), new { id = mappedResult.ID }, mappedResult);
+            return CreatedAtAction(nameof(GetById), new { id = mappedResult.ID }, mappedResult);
         }
 
         [HttpGet]
         [Route("{idUser}/getAllFriendRequests")]
         public async Task<IActionResult> GetAllFriendRequestsOfUser(int idUser)
         {
+            _logger.LogInformation("Creating get all friend requests of user query... ");
             var query = new GetAllFriendRequestsOfUserQuery { IDUser = idUser };
+
+            _logger.LogInformation("Calling get all friend requests of user query using mediator... ");
             var result = await _mediator.Send(query);
+
+            _logger.LogInformation("Mapping result object to Dto object... ");
             var mappedResult = _mapper.Map<List<FriendRequestGetDto>>(result);
+
             return Ok(mappedResult);
         }
 
@@ -57,13 +64,21 @@ namespace WebPresentation.Controllers
         [Route("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
+            _logger.LogInformation("Creating get friend request by id query... ");
             var query = new GetFriendRequestByIdQuery { ID = id };
+
+            _logger.LogInformation("Calling get friend request by id query using mediator... ");
             var result = await _mediator.Send(query);
 
             if (result == null)
+            {
+                _logger.LogInformation($"Friend request with the id = {id} not found.");
                 return NotFound();
+            }
 
+            _logger.LogInformation("Mapping result object to Dto object... ");
             var mappedResult = _mapper.Map<FriendRequestGetDto>(result);
+
             return Ok(mappedResult);
         }
 
@@ -71,9 +86,15 @@ namespace WebPresentation.Controllers
         [Route("{idLogged}/friends/{idRequester}")]
         public async Task<IActionResult> GetFriendRequestOfUser(int idLogged, int idRequester)
         {
+            _logger.LogInformation("Creating get friend request of user query... ");
             var query = new GetFriendRequestOfUserQuery { IDUser = idLogged, IDRequester = idRequester };
+
+            _logger.LogInformation("Calling get friend request of user query using mediator... ");
             var result = await _mediator.Send(query);
+
+            _logger.LogInformation("Mapping result object to Dto object... ");
             var mappedResult = _mapper.Map<FriendRequestGetDto>(result);
+
             return Ok(mappedResult);
         }
 
@@ -81,6 +102,7 @@ namespace WebPresentation.Controllers
         [Route("accepted")]
         public IActionResult UpdateFriendRequest(bool accepted, [FromBody] FriendRequestPutPostDto updated)
         {
+            _logger.LogInformation("Creating update friend request command... ");
             var command = new UpdateFriendRequestCommand
             {
                 IDUser = updated.IDUser,
@@ -88,10 +110,15 @@ namespace WebPresentation.Controllers
                 Accepted = accepted,
 
             };
+
+            _logger.LogInformation("Calling update friend request command using mediator... ");
             var result = _mediator.Send(command);
 
-            if (result == null)
+            if (result.IsCompleted == false)
+            {
+                _logger.LogInformation($"Command not completed.");
                 return NotFound();
+            }
 
             return NoContent();
         }

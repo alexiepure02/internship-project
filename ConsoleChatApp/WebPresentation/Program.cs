@@ -30,7 +30,7 @@ builder.Services.AddAutoMapper(typeof(AssemblyMarketPresentatio));
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddReact();
 builder.Services.AddJsEngineSwitcher(options => options.DefaultEngineName = V8JsEngine.EngineName).AddV8();
-//builder.Services.AddControllersWithViews().SetCompatibilityVersion(CompatibilityVersion.Version_3_0);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

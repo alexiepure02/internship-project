@@ -1,11 +1,13 @@
 ﻿using Application.Queries.GetMessageByIdQuery;
 using Application.Queries.GetMessagesBetweenTwoUsersQuery;
 using AutoMapper;
+using Castle.Core.Logging;
 using Domain;
 using Domain.Exceptions;
 using Infrastructure;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using System.Net;
 using WebPresentation.Controllers;
@@ -17,6 +19,7 @@ namespace xUnitTests
     {
         private readonly Mock<IMediator> _mediator = new Mock<IMediator>();
         private readonly Mock<IMapper> _mapper = new Mock<IMapper>();
+        private readonly Mock<ILogger<MessagesController>> _logger = new Mock<ILogger<MessagesController>>();
 
         [Fact]
         public async Task Get_Messages_Between_Two_Users_GetMessageBetweenTwoUsersQueryIsCalled()
@@ -25,7 +28,7 @@ namespace xUnitTests
                 .Setup(m => m.Send(It.IsAny<GetMessagesBetweenTwoUsersQuery>(), It.IsAny<CancellationToken>()))
                 .Verifiable();
 
-            var controller = new MessagesController(_mapper.Object, _mediator.Object);
+            var controller = new MessagesController(_mapper.Object, _mediator.Object, _logger.Object);
             await controller.GetMessages(1, 2);
 
             _mediator.Verify(x => x.Send(It.IsAny<GetMessagesBetweenTwoUsersQuery>(), It.IsAny<CancellationToken>()), Times.Once());
@@ -81,7 +84,7 @@ namespace xUnitTests
                         });
                 });
 
-            var controller = new MessagesController(_mapper.Object, _mediator.Object);
+            var controller = new MessagesController(_mapper.Object, _mediator.Object, _logger.Object);
             await controller.GetMessages(1, 2);
 
             Assert.Equal(1, idUser1);
@@ -131,7 +134,7 @@ namespace xUnitTests
                         }
                 );
 
-            var controller = new MessagesController(_mapper.Object, _mediator.Object);
+            var controller = new MessagesController(_mapper.Object, _mediator.Object, _logger.Object);
             var result = await controller.GetMessages(1, 2);
 
             var okResult = result as OkObjectResult;
@@ -234,7 +237,7 @@ namespace xUnitTests
                 .Setup(m => m.Send(It.IsAny<GetMessagesBetweenTwoUsersQuery>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(messages);
 
-            var controller = new MessagesController(_mapper.Object, _mediator.Object);
+            var controller = new MessagesController(_mapper.Object, _mediator.Object, _logger.Object);
             var result = await controller.GetMessages(1, 2);
 
             var okResult = result as OkObjectResult;
@@ -249,7 +252,7 @@ namespace xUnitTests
                 .Setup(m => m.Send(It.IsAny<GetMessageByIdQuery>(), It.IsAny<CancellationToken>()))
                 .Verifiable();
 
-            var controller = new MessagesController(_mapper.Object, _mediator.Object);
+            var controller = new MessagesController(_mapper.Object, _mediator.Object, _logger.Object);
             await controller.GetById(1);
 
             _mediator.Verify(x => x.Send(It.IsAny<GetMessageByIdQuery>(), It.IsAny<CancellationToken>()), Times.Once());
@@ -277,7 +280,7 @@ namespace xUnitTests
                         });
                 });
 
-            var controller = new MessagesController(_mapper.Object, _mediator.Object);
+            var controller = new MessagesController(_mapper.Object, _mediator.Object, _logger.Object);
             await controller.GetById(1);
 
             Assert.Equal(1, idMessage);
@@ -298,7 +301,7 @@ namespace xUnitTests
                                 DateTime = "12"
                             });
 
-            var controller = new MessagesController(_mapper.Object, _mediator.Object);
+            var controller = new MessagesController(_mapper.Object, _mediator.Object, _logger.Object);
             var result = await controller.GetById(1);
 
             var okResult = result as OkObjectResult;
@@ -341,7 +344,7 @@ namespace xUnitTests
                 .Setup(m => m.Send(It.IsAny<GetMessageByIdQuery>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(message);
 
-            var controller = new MessagesController(_mapper.Object, _mediator.Object);
+            var controller = new MessagesController(_mapper.Object, _mediator.Object, _logger.Object);
             var result = await controller.GetById(1);
 
             var okResult = result as OkObjectResult;
