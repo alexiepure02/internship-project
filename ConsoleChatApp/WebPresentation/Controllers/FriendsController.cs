@@ -8,7 +8,7 @@ using WebPresentation.Dto;
 
 namespace WebPresentation.Controllers
 {
-    [Route("api/v1/[controller]")]
+    [Route("api/friends")]
     [ApiController]
     public class FriendsController : ControllerBase
     {
@@ -24,7 +24,7 @@ namespace WebPresentation.Controllers
         }
 
         [HttpGet]
-        [Route("{id}")]
+        [Route("{idLogged}")]
         public async Task<IActionResult> GetAllFriendsOfUser(int id)
         {
             _logger.LogInformation("Creating get all friends of user query... ");
@@ -40,7 +40,7 @@ namespace WebPresentation.Controllers
         }
 
         [HttpGet]
-        [Route("{idLogged}/friends/{idFriend}")]
+        [Route("{idLogged},{idFriend}")]
         public async Task<IActionResult> GetFriendOfUser(int idLogged, int idFriend)
         {
             _logger.LogInformation("Creating get friend of user query... ");
@@ -55,7 +55,7 @@ namespace WebPresentation.Controllers
         }
 
         [HttpDelete]
-        [Route("{idLogged}/friends/{idFriend}")]
+        [Route("{idLogged},{idFriend}")]
         public async Task<IActionResult> DeleteFriend(int idLogged, int idFriend)
         {
             _logger.LogInformation("Creating delete friend command... ");

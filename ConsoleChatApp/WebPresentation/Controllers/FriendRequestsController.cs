@@ -10,7 +10,7 @@ using WebPresentation.Dto;
 
 namespace WebPresentation.Controllers
 {
-    [Route("api/v1/[controller]")]
+    [Route("api/friend-requests")]
     [ApiController]
     public class FriendRequestsController : ControllerBase
     {
@@ -45,11 +45,11 @@ namespace WebPresentation.Controllers
         }
 
         [HttpGet]
-        [Route("{idUser}/getAllFriendRequests")]
-        public async Task<IActionResult> GetAllFriendRequestsOfUser(int idUser)
+        [Route("{idLogged}")]
+        public async Task<IActionResult> GetAllFriendRequestsOfUser(int idLogged)
         {
             _logger.LogInformation("Creating get all friend requests of user query... ");
-            var query = new GetAllFriendRequestsOfUserQuery { IDUser = idUser };
+            var query = new GetAllFriendRequestsOfUserQuery { IDUser = idLogged };
 
             _logger.LogInformation("Calling get all friend requests of user query using mediator... ");
             var result = await _mediator.Send(query);
@@ -83,7 +83,7 @@ namespace WebPresentation.Controllers
         }
 
         [HttpGet]
-        [Route("{idLogged}/friends/{idRequester}")]
+        [Route("{idLogged},{idRequester}")]
         public async Task<IActionResult> GetFriendRequestOfUser(int idLogged, int idRequester)
         {
             _logger.LogInformation("Creating get friend request of user query... ");
@@ -99,14 +99,14 @@ namespace WebPresentation.Controllers
         }
 
         [HttpPut]
-        [Route("accepted")]
-        public IActionResult UpdateFriendRequest(bool accepted, [FromBody] FriendRequestPutPostDto updated)
+        [Route("{idLogged},{idRequester},{accepted}")]
+        public IActionResult UpdateFriendRequest(int idLogged, int idRequester, bool accepted)
         {
             _logger.LogInformation("Creating update friend request command... ");
             var command = new UpdateFriendRequestCommand
             {
-                IDUser = updated.IDUser,
-                IDRequester = updated.IDRequester,
+                IDUser = idLogged,
+                IDRequester = idRequester,
                 Accepted = accepted,
 
             };

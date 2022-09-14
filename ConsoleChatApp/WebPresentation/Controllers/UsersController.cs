@@ -9,7 +9,7 @@ using WebPresentation.Dto;
 
 namespace WebPresentation.Controllers
 {
-    [Route("api/v1/[controller]")]
+    [Route("api/users")]
     [ApiController]
     public class UsersController : ControllerBase
     {
@@ -79,7 +79,7 @@ namespace WebPresentation.Controllers
         }
 
         [HttpGet]
-        [Route("{username}/{password}")]
+        [Route("{username},{password}")]
         public async Task<IActionResult> GetByAccount(string username, string password)
         {
             _logger.LogInformation("Creating get user by account query... ");

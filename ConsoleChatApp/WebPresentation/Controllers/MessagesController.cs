@@ -8,7 +8,7 @@ using WebPresentation.Dto;
 
 namespace WebPresentation.Controllers
 {
-    [Route("api/v1/[controller]")]
+    [Route("api/messages")]
     [ApiController]
     public class MessagesController : ControllerBase
     {
@@ -43,7 +43,7 @@ namespace WebPresentation.Controllers
         }
 
         [HttpGet]
-        [Route("{idLogged}/friends/{idFriend}")]
+        [Route("{idLogged},{idFriend}")]
         public async Task<IActionResult> GetMessages(int idLogged, int idFriend)
         {
             _logger.LogInformation("Creating get messages between two users query... ");
