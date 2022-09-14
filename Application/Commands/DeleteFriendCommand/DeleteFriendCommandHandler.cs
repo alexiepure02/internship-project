@@ -26,8 +26,11 @@ namespace Application.Commands.DeleteFriendCommand
                 IDFriend = info.IDFriend
             };
 
-            await _unitOfWork.UserRepository.DeleteFriendAsync(friend);
+            bool completed = await _unitOfWork.UserRepository.DeleteFriendAsync(friend);
             await _unitOfWork.Save();
+
+            if (completed == false)
+                return null;
 
             return friend;
         }

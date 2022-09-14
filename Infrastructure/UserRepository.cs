@@ -90,7 +90,7 @@ namespace Infrastructure
                 throw new InvalidFriendRequestException();
         }
         
-        public async Task DeleteFriendAsync(Friends friend)
+        public async Task<bool> DeleteFriendAsync(Friends friend)
         {
             var friend1 = await _context.Friends
                 .Where(f => f.IDUser == friend.IDUser && f.IDFriend == friend.IDFriend)
@@ -104,7 +104,10 @@ namespace Infrastructure
             {
                 _context.Friends.Remove(friend1);
                 _context.Friends.Remove(friend2);
+
+                return true;
             }
+            return false;
         }
 
         public async Task<List<Friends>> GetAllFriendsOfUserAsync(int idUser)
