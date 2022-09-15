@@ -22,7 +22,7 @@ namespace xUnitTests
         private readonly Mock<ILogger<MessagesController>> _logger = new Mock<ILogger<MessagesController>>();
 
         [Fact]
-        public async Task Get_Messages_Between_Two_Users_GetMessageBetweenTwoUsersQueryIsCalled()
+        public async Task GetMessageBetweenTwoUsersQuery_IsCalled()
         {
             _mediator
                 .Setup(m => m.Send(It.IsAny<GetMessagesBetweenTwoUsersQuery>(), It.IsAny<CancellationToken>()))
@@ -35,7 +35,7 @@ namespace xUnitTests
         }
 
         [Fact]
-        public async Task Get_Messages_Between_Two_Users_GetMessageBetweenTwoUsersQueryWithCorrectMessagesIsCalled()
+        public async Task GetMessageBetweenTwoUsersQuery_WithCorrectMessagesIsCalled()
         {
             int idUser1 = 0;
             int idUser2 = 0;
@@ -92,7 +92,7 @@ namespace xUnitTests
         }
 
         [Fact]
-        public async Task Get_Messages_Between_Two_Users_ShouldReturnOkStatusCode()
+        public async Task GetMessagesBetweenTwoUsersQuery_ShouldReturnOkStatusCode()
         {
             _mediator
                 .Setup(m => m.Send(It.IsAny<GetMessagesBetweenTwoUsersQuery>(), It.IsAny<CancellationToken>()))
@@ -143,7 +143,7 @@ namespace xUnitTests
         }
 
         [Fact]
-        public async Task Get_Messages_Between_Two_Users_ShouldReturnFoundMessages()
+        public async Task GetMessagesBetweenTwoUsersQuery_ShouldReturnFoundMessages()
         {
             var messages = new List<Message>
             {
@@ -218,20 +218,7 @@ namespace xUnitTests
 
             _mapper
                 .Setup(m => m.Map<List<MessageGetDto>>(It.IsAny<List<Message>>()))
-                .Returns((List<Message> src) =>
-                {
-                    var messagesDto = new List<MessageGetDto>();
-                    foreach (var message in src)
-                        messagesDto.Add(new MessageGetDto
-                        {
-                            ID = message.ID,
-                            IDSender = message.IDSender,
-                            IDReceiver = message.IDReceiver,
-                            Text = message.Text,
-                            DateTime = message.DateTime
-                        });
-                    return messagesDto;
-                });
+                .Returns(messagesDto);
 
             _mediator
                 .Setup(m => m.Send(It.IsAny<GetMessagesBetweenTwoUsersQuery>(), It.IsAny<CancellationToken>()))
@@ -246,7 +233,7 @@ namespace xUnitTests
         }
 
         [Fact]
-        public async Task Get_Message_By_Id_GetMessageByIdQueryIsCalled()
+        public async Task GetMessageByIdQuery_IsCalled()
         {
             _mediator
                 .Setup(m => m.Send(It.IsAny<GetMessageByIdQuery>(), It.IsAny<CancellationToken>()))
@@ -259,7 +246,7 @@ namespace xUnitTests
         }
 
         [Fact]
-        public async Task Get_Message_By_Id_GetMessageByIdWithCorrectMessagesIsCalled()
+        public async Task GetMessageByIdQuery_WithCorrectMessagesIsCalled()
         {
             int idMessage = 0;
 
@@ -287,7 +274,7 @@ namespace xUnitTests
         }
 
         [Fact]
-        public async Task Get_Message_By_Id_ShouldReturnOkStatusCode()
+        public async Task GetMessageByIdQuery_ShouldReturnOkStatusCode()
         {
             _mediator
                 .Setup(m => m.Send(It.IsAny<GetMessageByIdQuery>(), It.IsAny<CancellationToken>()))
@@ -310,7 +297,7 @@ namespace xUnitTests
         }
 
         [Fact]
-        public async Task Get_Message_By_Id_ShouldReturnFoundMessage()
+        public async Task GetMessageByIdQuery_ShouldReturnFoundMessage()
         {
             var message = new Message
             {
@@ -331,14 +318,7 @@ namespace xUnitTests
 
             _mapper
                 .Setup(m => m.Map<MessageGetDto>(It.IsAny<Message>()))
-                .Returns((Message src) => new MessageGetDto
-                {
-                    ID = src.ID,
-                    IDSender = src.IDSender,
-                    IDReceiver = src.IDReceiver,
-                    Text = src.Text,
-                    DateTime = src.DateTime
-                });
+                .Returns(messageDto);
 
             _mediator
                 .Setup(m => m.Send(It.IsAny<GetMessageByIdQuery>(), It.IsAny<CancellationToken>()))
