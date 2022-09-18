@@ -244,27 +244,27 @@ namespace WebPresentation.Controllers
             return Ok(mappedResult);
         }
          
-        [HttpGet]
-        [Route("{id}/friend-requests/{idRequester},{accepted}")]
-        public IActionResult UpdateFriendRequest(int id, int idRequester, bool accepted)
+        [HttpPut]
+        [Route("friend-requests")]
+        public async Task<IActionResult> UpdateFriendRequestAsync([FromBody] FriendRequestPutPostDto friendRequest, bool accepted)
         {
             _logger.LogInformation("Creating update friend request command... ");
             var command = new UpdateFriendRequestCommand
             {
-                IDUser = id,
-                IDRequester = idRequester,
+                IDUser = friendRequest.IDUser,
+                IDRequester = friendRequest.IDRequester,
                 Accepted = accepted,
 
             };
 
             _logger.LogInformation("Calling update friend request command using mediator... ");
-            var result = _mediator.Send(command);
+            var result = await _mediator.Send(command);
 
-            if (result.IsCompleted == false)
+            /*if (result.IsCompleted == false)
             {
                 _logger.LogInformation("Command not completed.");
                 return NotFound();
-            }
+            }*/
 
             return NoContent();
         }
