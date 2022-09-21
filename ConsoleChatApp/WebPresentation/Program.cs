@@ -8,13 +8,25 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using React.AspNet;
 using WebPresentation;
+using WebPresentation.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ClientPermission",
+        policy =>
+    {
+        policy.AllowAnyHeader()
+            .AllowAnyMethod()
+            .WithOrigins("http://127.0.0.1:5173")
+            .AllowCredentials();
+    });
+});
+
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -26,6 +38,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("Default")));
 builder.Services.AddMediatR(typeof(CreateUserCommand));
 builder.Services.AddAutoMapper(typeof(AssemblyMarketPresentatio));
+builder.Services.AddSignalR();
 
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddReact();
@@ -42,8 +55,12 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors("ClientPermission");
+
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<ChatHub>("/hub/chatter");
 
 app.Run();

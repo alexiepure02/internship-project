@@ -1,5 +1,6 @@
 ﻿using Application;
 using Domain;
+using Domain.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -41,7 +42,10 @@ namespace Infrastructure
 
         public async Task CreateMessageAsync(Message message)
         {
-            await _context.Messages.AddAsync(message);
+            if (ValidateMessage(message.Text))
+                await _context.Messages.AddAsync(message);
+            else
+                throw new InvalidMessageException();
         }
 
         public async Task<List<Message>> GetMessagesBetweenTwoUsersAsync(int idUser1, int idUser2)

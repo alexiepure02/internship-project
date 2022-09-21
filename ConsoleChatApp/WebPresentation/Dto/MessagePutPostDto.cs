@@ -9,6 +9,7 @@ namespace WebPresentation.Dto
         [Required]
         public int IDReceiver { get; set; }
         [Required]
+        [MaxLength(256)]
         public string Text { get; set; }
 
     }
