@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Application.Queries.GetAllFriendsOfUserQuery
 {
-    public class GetAllFriendsOfUserQueryHandler : IRequestHandler<GetAllFriendsOfUserQuery, List<Friends>>
+    public class GetAllFriendsOfUserQueryHandler : IRequestHandler<GetAllFriendsOfUserQuery, List<User>>
     {
         private IUnitOfWork _unitOfWork;
 
@@ -18,7 +18,7 @@ namespace Application.Queries.GetAllFriendsOfUserQuery
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<List<Friends>> Handle(GetAllFriendsOfUserQuery info, CancellationToken cancellationToken)
+        public async Task<List<User>> Handle(GetAllFriendsOfUserQuery info, CancellationToken cancellationToken)
         {
             return await _unitOfWork.UserRepository.GetAllFriendsOfUserAsync(info.IDUser);
         }

@@ -110,9 +110,16 @@ namespace Infrastructure
             return false;
         }
 
-        public async Task<List<Friends>> GetAllFriendsOfUserAsync(int idUser)
+        public async Task<List<User>> GetAllFriendsOfUserAsync(int idUser)
         {
-            var friends = await _context.Friends.Where(f => f.IDUser == idUser).ToListAsync();
+            var friendsIds = await _context.Friends.Where(f => f.IDUser == idUser).ToListAsync();
+
+            var friends = new List<User>();
+
+            foreach (var friendId in friendsIds)
+            {
+                friends.Add(await _context.Users.SingleOrDefaultAsync(u => u.ID == friendId.IDFriend));
+            }
 
             if (friends == null)
             {

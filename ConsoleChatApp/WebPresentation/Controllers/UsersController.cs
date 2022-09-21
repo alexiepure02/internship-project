@@ -12,11 +12,13 @@ using Application.Queries.GetUserByAccountQuery;
 using Application.Queries.GetUserByIdQuery;
 using AutoMapper;
 using MediatR;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using WebPresentation.Dto;
 
 namespace WebPresentation.Controllers
 {
+    [EnableCors("ClientPermission")]
     [Route("api/users")]
     [ApiController]
     public class UsersController : ControllerBase
@@ -119,7 +121,7 @@ namespace WebPresentation.Controllers
             var result = await _mediator.Send(query);
 
             _logger.LogInformation("Mapping result object to Dto object... ");
-            var mappedResult = _mapper.Map<List<FriendGetDto>>(result);
+            var mappedResult = _mapper.Map<List<UserGetDto>>(result);
 
             return Ok(mappedResult);
         }
@@ -243,7 +245,7 @@ namespace WebPresentation.Controllers
 
             return Ok(mappedResult);
         }
-         
+
         [HttpPut]
         [Route("friend-requests")]
         public async Task<IActionResult> UpdateFriendRequestAsync([FromBody] FriendRequestPutPostDto friendRequest, bool accepted)

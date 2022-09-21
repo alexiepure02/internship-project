@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Application.Queries.GetAllFriendsOfUserQuery
 {
-    public class GetAllFriendsOfUserQuery : IRequest<List<Friends>>
+    public class GetAllFriendsOfUserQuery : IRequest<List<User>>
     {
         public int IDUser { get; set; }
     }
