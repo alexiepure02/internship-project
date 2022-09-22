@@ -15,7 +15,7 @@ namespace Application
         Task UpdateFriendRequestAsync(FriendRequests friendRequest, bool accepted);
         Task<bool> DeleteFriendAsync(Friends friend);
         Task<List<User>> GetAllFriendsOfUserAsync(int idUser);
-        Task<List<FriendRequests>> GetAllFriendRequestsOfUserAsync(int idUser);
+        Task<List<User>> GetAllFriendRequestsOfUserAsync(int idUser);
         Task<List<User>> GetAllUsersAsync();
         Task<Friends> GetFriendOfUserAsync(int idUser, int idFriend);
         Task<FriendRequests> GetFriendRequestOfUserAsync(int idUser, int idRequester);

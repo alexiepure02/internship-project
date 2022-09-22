@@ -11,6 +11,7 @@ using Application.Queries.GetFriendRequestOfUserQuery;
 using Application.Queries.GetUserByAccountQuery;
 using Application.Queries.GetUserByIdQuery;
 using AutoMapper;
+using Domain;
 using MediatR;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
@@ -197,7 +198,7 @@ namespace WebPresentation.Controllers
             var result = await _mediator.Send(query);
 
             _logger.LogInformation("Mapping result object to Dto object... ");
-            var mappedResult = _mapper.Map<List<FriendRequestGetDto>>(result);
+            var mappedResult = _mapper.Map<List<UserGetDto>>(result);
 
             return Ok(mappedResult);
         }
@@ -247,7 +248,7 @@ namespace WebPresentation.Controllers
         }
 
         [HttpPut]
-        [Route("friend-requests")]
+        [Route("friend-requests/{accepted}")]
         public async Task<IActionResult> UpdateFriendRequestAsync([FromBody] FriendRequestPutPostDto friendRequest, bool accepted)
         {
             _logger.LogInformation("Creating update friend request command... ");
