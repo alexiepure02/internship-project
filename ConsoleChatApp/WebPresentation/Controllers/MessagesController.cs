@@ -32,9 +32,24 @@ namespace WebPresentation.Controllers
 
         [Route("msg")]
         [HttpPost]
-        public async Task Post(MessagePutPostDto message)
+        public async Task<IActionResult> Post(MessagePutPostDto message)
         {
-            await _chatHub.Clients.All.ReceiveMessage(message);
+            _logger.LogInformation("Creating create message command using data from body... ");
+            var command = new CreateMessageCommand
+            {
+                IDSender = message.IDSender,
+                IDReceiver = message.IDReceiver,
+                Text = message.Text
+            };
+            _logger.LogInformation("Calling create message command using mediator... ");
+            var result = await _mediator.Send(command);
+
+            _logger.LogInformation("Mapping result object to Dto object... ");
+            var mappedResult = _mapper.Map<MessageGetDto>(result);
+
+            await _chatHub.Clients.All.ReceiveMessage(mappedResult);
+
+            return CreatedAtAction(nameof(GetById), new { id = mappedResult.ID }, mappedResult);
         }
 
         [HttpPost]

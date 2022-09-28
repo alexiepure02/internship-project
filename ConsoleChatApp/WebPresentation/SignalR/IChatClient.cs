@@ -5,6 +5,8 @@ namespace WebPresentation.SignalR
 {
     public interface IChatClient
     {
-        Task ReceiveMessage(MessagePutPostDto message);
+        Task ReceiveMessage(MessageGetDto message);
+
+        Task ReceiveMessage2();
     }
 }
