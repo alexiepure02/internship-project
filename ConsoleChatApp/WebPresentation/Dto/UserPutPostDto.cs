@@ -7,7 +7,7 @@ namespace WebPresentation.Dto
         [Required]
         [MaxLength(50)]
         [MinLength(5)]
-        public string Username { get; set; }
+        public string UserName { get; set; }
 
         [Required]
         [MaxLength(50)]

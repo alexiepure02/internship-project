@@ -14,7 +14,12 @@ using AutoMapper;
 using Domain;
 using MediatR;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 using WebPresentation.Dto;
 
 namespace WebPresentation.Controllers
@@ -27,12 +32,114 @@ namespace WebPresentation.Controllers
         private readonly IMapper _mapper;
         private readonly IMediator _mediator;
         private readonly ILogger<UsersController> _logger;
+        private readonly UserManager<User> _userManager;
+        private readonly RoleManager<IdentityRole<int>> _roleManager;
 
-        public UsersController(IMapper mapper, IMediator mediator, ILogger<UsersController> logger)
+        private readonly IConfiguration _configuration;
+
+        public UsersController(IMapper mapper, IMediator mediator, ILogger<UsersController> logger, UserManager<User> userManager, RoleManager<IdentityRole<int>> roleManager, IConfiguration configuration)
         {
             _mapper = mapper;
             _mediator = mediator;
             _logger = logger;
+            _userManager = userManager;
+            _roleManager = roleManager;
+            _configuration = configuration;
+        }
+
+        [HttpPost]
+        [Route("login")]
+        public async Task<IActionResult> Login(string userName, string Password)
+        {
+            var user = await _userManager.FindByNameAsync(userName);
+            if (user != null && await _userManager.CheckPasswordAsync(user, Password))
+            {
+                var userRoles = await _userManager.GetRolesAsync(user);
+
+                var authClaims = new List<Claim>
+                {
+                    new Claim("id", user.Id.ToString()),
+                    new Claim(ClaimTypes.Name, user.DisplayName)
+                };
+
+                foreach (var userRole in userRoles)
+                {
+                    authClaims.Add(new Claim(ClaimTypes.Role, userRole));
+                }
+
+                var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(this._configuration.GetConnectionString("SigningKey")));
+
+                var token = new JwtSecurityToken(
+                    issuer: "https://localhost:7228/",
+                    audience: "http://127.0.0.1:5173/",
+                    claims: authClaims,
+                    expires: DateTime.Now.AddHours(3),
+                    signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
+                    );
+
+                return Ok(new
+                {
+                    token = new JwtSecurityTokenHandler().WriteToken(token),
+                    expiration = token.ValidTo
+                });
+            }
+            return Unauthorized();
+        }
+
+        [HttpPost]
+        [Route("register")]
+        public async Task<IActionResult> Register(UserPutPostDto userInfo)
+        {
+            var userExists = await _userManager.FindByNameAsync(userInfo.UserName);
+
+            if (userExists != null)
+                return BadRequest("User already exists.");
+
+            User user = new()
+            {
+                UserName = userInfo.UserName,
+                DisplayName = userInfo.DisplayName
+            };
+
+            var result = await _userManager.CreateAsync(user, userInfo.Password);
+
+            if (!result.Succeeded)
+            {
+                return BadRequest("Failed to create user.");
+            }
+
+            return Ok("User created succesfully.");
+        }
+
+        [HttpPost]
+        [Route("assign-role")]
+        public async Task<IActionResult> AddToRole(string userName, string roleName)
+        {
+            var userExists = await _userManager.FindByNameAsync(userName);
+
+            if (userExists == null)
+            {
+                return BadRequest("User does not exist.");
+            }
+
+            var role = await _roleManager.FindByNameAsync(roleName);
+
+            if (role == null)
+            {
+                var roleAdded = await _roleManager.CreateAsync(new IdentityRole<int>
+                {
+                    Name = roleName
+                });
+            }
+
+            var adddRoleToUser = await _userManager.AddToRoleAsync(userExists, roleName);
+
+            if (!adddRoleToUser.Succeeded)
+            {
+                return BadRequest("Failed to add user to role.");
+            }
+
+            return Ok($"User addded succesfully to {roleName} role.");
         }
 
         [HttpPost]
@@ -41,7 +148,7 @@ namespace WebPresentation.Controllers
             _logger.LogInformation("Creating create user command using data from body... ");
             var command = new CreateUserCommand
             {
-                Username = user.Username,
+                Username = user.UserName,
                 Password = user.Password,
                 DisplayName = user.DisplayName
             };

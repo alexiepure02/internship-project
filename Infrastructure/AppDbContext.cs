@@ -1,5 +1,7 @@
 ﻿using Application;
 using Domain;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -9,14 +11,14 @@ using System.Threading.Tasks;
 
 namespace Infrastructure
 {
-    public class AppDbContext : DbContext
+    public class AppDbContext : IdentityDbContext<IdentityUser<int>, IdentityRole<int>, int>
     {
         public AppDbContext(DbContextOptions options) : base(options)
         {
 
         }
 
-        public DbSet<User> Users { get; set; }
+        //public DbSet<User> Users { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<Friends> Friends { get; set; }
         public DbSet<FriendRequests> FriendRequests { get; set; }
@@ -58,12 +60,7 @@ namespace Infrastructure
 
             // user validation
 
-            modelBuilder.Entity<User>().Property(x => x.ID).IsRequired();
-            modelBuilder.Entity<User>().Property(x => x.Username).HasMaxLength(50);
-            modelBuilder.Entity<User>().Property(x => x.Username).IsRequired();
-            modelBuilder.Entity<User>().Property(x => x.Password).HasMaxLength(50);
-            modelBuilder.Entity<User>().Property(x => x.Password).IsRequired();
-            modelBuilder.Entity<User>().Property(x => x.DisplayName).HasMaxLength(50);
+            modelBuilder.Entity<User>().Property(x => x.DisplayName).HasMaxLength(256);
             modelBuilder.Entity<User>().Property(x => x.DisplayName).IsRequired();
 
             // message validation
