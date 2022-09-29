@@ -1,4 +1,4 @@
-﻿using Application.Queries.GetMessageByIdQuery;
+﻿/*using Application.Queries.GetMessageByIdQuery;
 using Application.Queries.GetMessagesBetweenTwoUsersQuery;
 using AutoMapper;
 using Castle.Core.Logging;
@@ -332,4 +332,4 @@ namespace xUnitTests
             Assert.Equal(messageDto, okResult.Value);
         }
     }
-}
+}*/

@@ -11,7 +11,7 @@ namespace Application.Queries.GetAllUsersQuery
 {
     public class GetAllUsersQueryHandler : IRequestHandler<GetAllUsersQuery, List<User>>
     {
-        private IUnitOfWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
 
         public GetAllUsersQueryHandler(IUnitOfWork unitOfWork)
         {

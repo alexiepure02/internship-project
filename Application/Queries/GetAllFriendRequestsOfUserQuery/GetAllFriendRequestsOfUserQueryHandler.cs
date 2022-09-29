@@ -11,7 +11,7 @@ namespace Application.Queries.GetAllFriendRequestsOfUserQuery
 {
     internal class GetAllFriendRequestsOfUserQueryHandler : IRequestHandler<GetAllFriendRequestsOfUserQuery, List<User>>
     {
-        private IUnitOfWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
 
         public GetAllFriendRequestsOfUserQueryHandler(IUnitOfWork unitOfWork)
         {

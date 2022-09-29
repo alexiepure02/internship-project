@@ -11,7 +11,7 @@ namespace Application.Queries.GetMessagesBetweenTwoUsersQuery
 {
     internal class GetMessagesBetweenTwoUsersQueryHandler : IRequestHandler<GetMessagesBetweenTwoUsersQuery, List<Message>>
     {
-        private IUnitOfWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
 
         public GetMessagesBetweenTwoUsersQueryHandler(IUnitOfWork unitOfWork)
         {

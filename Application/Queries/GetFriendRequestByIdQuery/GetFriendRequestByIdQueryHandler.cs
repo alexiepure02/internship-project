@@ -10,7 +10,7 @@ namespace Application.Queries.GetFriendRequestByIdQuery
 {
     public class GetFriendRequestByIdQueryHandler : IRequestHandler<GetFriendRequestByIdQuery, FriendRequests>
     {
-        private IUnitOfWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
 
         public GetFriendRequestByIdQueryHandler(IUnitOfWork unitOfWork)
         {

@@ -11,7 +11,7 @@ namespace Application.Queries.GetAllFriendsOfUserQuery
 {
     public class GetAllFriendsOfUserQueryHandler : IRequestHandler<GetAllFriendsOfUserQuery, List<User>>
     {
-        private IUnitOfWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
 
         public GetAllFriendsOfUserQueryHandler(IUnitOfWork unitOfWork)
         {

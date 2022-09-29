@@ -1,4 +1,4 @@
-using Application.Commands.CreateFriendRequestCommand;
+/*using Application.Commands.CreateFriendRequestCommand;
 using Application.Queries.GetAllFriendRequestsOfUserQuery;
 using Application.Queries.GetAllFriendsOfUserQuery;
 using Application.Queries.GetAllUsersQuery;
@@ -761,4 +761,4 @@ namespace xUnitTests
             Assert.Equal(friendRequestDto, okResult.Value);
         }
     }
-}
+}*/

@@ -1,4 +1,4 @@
-﻿using Application;
+﻿/*using Application;
 using Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using MediatR;
@@ -164,14 +164,14 @@ namespace Presentation
 
             // add data to database
 
-            /*context.Database.EnsureDeleted();
+            *//*context.Database.EnsureDeleted();
             context.Database.EnsureCreated();
 
             context.Add(usersData[0]);
             context.Add(usersData[1]);
             context.Add(usersData[2]);
 
-            context.SaveChanges();*/
+            context.SaveChanges();*//*
             
             var mediator = Init();
 
@@ -441,4 +441,4 @@ namespace Presentation
             Console.WriteLine($"DateTime: {message.DateTime}");
         }
     }
-}
+}*/

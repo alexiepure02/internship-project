@@ -10,7 +10,7 @@ namespace Application.Queries.GetMessageByIdQuery
 {
     public class GetMessageByIdQueryHandler : IRequestHandler<GetMessageByIdQuery, Message>
     {
-        private IUnitOfWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
 
         public GetMessageByIdQueryHandler(IUnitOfWork unitOfWork)
         {

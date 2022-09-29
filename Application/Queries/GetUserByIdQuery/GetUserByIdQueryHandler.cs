@@ -11,7 +11,7 @@ namespace Application.Queries.GetUserByIdQuery
 {
     public class GetUserByIdQueryHandler : IRequestHandler<GetUserByIdQuery, User>
     {
-        private IUnitOfWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
 
         public GetUserByIdQueryHandler(IUnitOfWork unitOfWork)
         {

@@ -18,7 +18,6 @@ namespace Infrastructure
 
         }
 
-        //public DbSet<User> Users { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<Friends> Friends { get; set; }
         public DbSet<FriendRequests> FriendRequests { get; set; }

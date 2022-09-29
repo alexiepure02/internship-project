@@ -3,6 +3,7 @@ using Application.Queries.GetMessageByIdQuery;
 using Application.Queries.GetMessagesBetweenTwoUsersQuery;
 using AutoMapper;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -11,6 +12,7 @@ using WebPresentation.SignalR;
 
 namespace WebPresentation.Controllers
 {
+    [Authorize]
     [EnableCors("ClientPermission")]
     [Route("api/messages")]
     [ApiController]

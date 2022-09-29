@@ -11,7 +11,7 @@ namespace Application.Commands.DeleteFriendCommand
 {
     public class DeleteFriendCommandHandler : IRequestHandler<DeleteFriendCommand, Friends>
     {
-        private IUnitOfWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
 
         public DeleteFriendCommandHandler(IUnitOfWork unitOfWork)
         {

@@ -11,7 +11,7 @@ namespace Application.Queries.GetFriendOfUserQuery
 {
     public class GetFriendOfUserQueryHandler : IRequestHandler<GetFriendOfUserQuery, Friends>
     {
-        private IUnitOfWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
 
         public GetFriendOfUserQueryHandler(IUnitOfWork unitOfWork)
         {

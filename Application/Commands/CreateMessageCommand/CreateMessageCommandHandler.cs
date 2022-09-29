@@ -10,7 +10,7 @@ namespace Application.Commands.CreateMessageCommand
 {
     public class CreateMessageCommandHandler : IRequestHandler<CreateMessageCommand, Message>
     {
-        private IUnitOfWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
 
         public CreateMessageCommandHandler(IUnitOfWork unitOfWork)
         {

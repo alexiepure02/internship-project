@@ -11,7 +11,7 @@ namespace Application.Commands.UpdateFriendRequestCommand
 {
     public class UpdateFriendRequestCommandHandler : IRequestHandler<UpdateFriendRequestCommand, FriendRequests>
     {
-        private IUnitOfWork _unitOfWork;
+        private readonly IUnitOfWork _unitOfWork;
 
         public UpdateFriendRequestCommandHandler(IUnitOfWork unitOfWork)
         {

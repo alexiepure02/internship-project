@@ -1,5 +1,5 @@
 using Application;
-using Application.Commands.CreateUserCommand;
+using Application.Commands.CreateMessageCommand;
 using Domain;
 using Infrastructure;
 using JavaScriptEngineSwitcher.Extensions.MsDependencyInjection;
@@ -56,14 +56,14 @@ builder.Services.AddAuthentication(options =>
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
-            ValidateAudience = true,
+            ValidateAudience = false,
             ValidAudience = "audience",
-            ValidIssuer = "https://localhost:7228/",
+            ValidIssuer = "https://localhost:7228",
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration.GetConnectionString("SigningKey")))
         };
     });
 
-builder.Services.AddMediatR(typeof(CreateUserCommand));
+builder.Services.AddMediatR(typeof(CreateMessageCommand));
 builder.Services.AddAutoMapper(typeof(AssemblyMarketPresentatio));
 builder.Services.AddSignalR();
 
@@ -83,6 +83,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseCors("ClientPermission");
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
