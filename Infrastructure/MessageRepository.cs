@@ -59,7 +59,14 @@ namespace Infrastructure
             {
                 return null;
             }
-            return messages.OrderBy(m => m.DateTime).ToList();
+
+            // add 3 hrs to match ro
+            messages.Select(message => { message.DateTime = Convert.ToDateTime(message.DateTime).AddHours(3).ToString(); return message; }).ToList();
+
+            // sort by datetime
+            messages.Sort((x, y) => DateTime.Compare(Convert.ToDateTime(x.DateTime), Convert.ToDateTime(y.DateTime)));
+
+            return messages;
         }
 
         public async Task<Message> GetMessageByIdAsync(int id)
@@ -72,6 +79,27 @@ namespace Infrastructure
                 return null;
             }
             return message;
+        }
+
+        public async Task<int> GetNumberOfMessagesBetweenTwoUsersAsync(int idUser1, int idUser2)
+        {
+            return await _context.Messages
+                .Where(m => m.IDSender == idUser1 && m.IDReceiver == idUser2 || m.IDSender == idUser2 && m.IDReceiver == idUser1).CountAsync();
+        }
+
+        public async Task<List<Message>> GetSomeMessagesFromOffset(int idUser1, int idUser2, int offset, int numberOfMessages)
+        {
+            var messages = await _context.Messages
+                .Where(m => m.IDSender == idUser1 && m.IDReceiver == idUser2 ||
+                m.IDSender == idUser2 && m.IDReceiver == idUser1).OrderByDescending(m => m.DateTime).Skip(offset).Take(numberOfMessages).ToListAsync();
+
+            messages.Sort((x, y) => DateTime.Compare(Convert.ToDateTime(x.DateTime), Convert.ToDateTime(y.DateTime)));
+
+            if (messages == null)
+            {
+                return null;
+            }
+            return messages;
         }
     }
 }

@@ -23,5 +23,6 @@ namespace Application
         Task<FriendRequests> GetFriendRequestOfUserAsync(int idUser, int idRequester);
         Task<FriendRequests> GetFriendRequestByIdAsync(int id);
         Task<User> GetUserByIdAsync(int idUser);
+        Task<User> UpdateDisplayName(int idUser, string newDisplayName);
     }
 }

@@ -4,6 +4,7 @@ using Application.Commands.DeleteFriendCommand;
 using Application.Commands.LoginCommand;
 using Application.Commands.RegisterCommand;
 using Application.Commands.UpdateFriendRequestCommand;
+using Application.Commands.UpdateUserCommand;
 using Application.Queries.GetAllFriendRequestsOfUserQuery;
 using Application.Queries.GetAllFriendsOfUserQuery;
 using Application.Queries.GetAllUsersQuery;
@@ -326,6 +327,24 @@ namespace WebPresentation.Controllers
             };
 
             _logger.LogInformation("Calling update friend request command using mediator... ");
+            await _mediator.Send(command);
+
+            return NoContent();
+        }
+
+        [HttpPut]
+        [Route("{id}/{displayName}")]
+        [Authorize]
+        public async Task<IActionResult> UpdateUser(int id, string displayName)
+        {
+            _logger.LogInformation("Creating update display name command... ");
+            var command = new UpdateUserDisplayNameCommand
+            {
+                IdUser = id,
+                NewDisplayName = displayName,
+            };
+
+            _logger.LogInformation("Calling update display name command using mediator... ");
             await _mediator.Send(command);
 
             return NoContent();

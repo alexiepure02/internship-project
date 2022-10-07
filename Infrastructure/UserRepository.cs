@@ -2,6 +2,7 @@
 using Domain;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.ClearScript.JavaScript;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -41,7 +42,7 @@ namespace Infrastructure
                 var authClaims = new List<Claim>
                 {
                     new Claim("id", user.Id.ToString()),
-                    new Claim(ClaimTypes.Name, user.DisplayName)
+                    new Claim("name", user.DisplayName)
                 };
 
                 foreach (var userRole in userRoles)
@@ -57,7 +58,7 @@ namespace Infrastructure
                     issuer: "https://localhost:7228",
                     //audience: "audience",
                     claims: authClaims,
-                    expires: DateTime.Now.AddHours(300),
+                    expires: DateTime.Now.AddHours(3),
                     signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
                     );
 
@@ -121,7 +122,13 @@ namespace Infrastructure
         public async Task CreateFriendRequestAsync(FriendRequests friendRequest)
         {
             var friendRequestDB = await _context.FriendRequests.SingleOrDefaultAsync(f => f.IDUser == friendRequest.IDUser && f.IDRequester == friendRequest.IDRequester);
+            var friendDB = await _context.Friends.SingleOrDefaultAsync(f => f.IDUser == friendRequest.IDUser && f.IDFriend == friendRequest.IDRequester);
 
+            if (friendDB != null)
+                throw new InvalidFriendRequestException();
+
+            if (friendRequest.IDUser == friendRequest.IDRequester)
+                throw new SameIdException(friendRequest.IDUser);
             if (friendRequestDB == null)
                 await _context.FriendRequests.AddAsync(friendRequest);
         }
@@ -276,6 +283,22 @@ namespace Infrastructure
                 return null;
             }
             return user;
+        }
+
+        public async Task<User> UpdateDisplayName(int idUser, string newDisplayName)
+        {
+            var user = await _userManager.FindByIdAsync(idUser.ToString());
+
+            if (user != null)
+            {
+                user.DisplayName = newDisplayName;
+
+                await _userManager.UpdateAsync(user);
+
+                return user;
+            }
+            else
+                throw new UserNotFoundException(idUser);
         }
     }
 }
