@@ -1,6 +1,7 @@
 ﻿using Application.Commands.CreateMessageCommand;
 using Application.Queries.GetMessageByIdQuery;
 using Application.Queries.GetMessagesBetweenTwoUsersQuery;
+using Application.Queries.GetNumberOfMessagesBetweenTwoUsersQuery;
 using Application.Queries.GetSomeMessagesFromOffsetQuery;
 using AutoMapper;
 using MediatR;
@@ -125,7 +126,7 @@ namespace WebPresentation.Controllers
         public async Task<IActionResult> GetNumberOfMessages(int idLogged, int idFriend)
         {
             _logger.LogInformation("Creating get number of messages query... ");
-            var query = new GetSomeMessagesFromOffsetQuery
+            var query = new GetNumberOfMessagesBetweenTwoUsersQuery
             {
                 IDUser1 = idLogged,
                 IDUser2 = idFriend
