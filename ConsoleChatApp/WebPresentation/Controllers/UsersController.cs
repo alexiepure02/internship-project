@@ -3,11 +3,13 @@ using Application.Commands.CreateFriendRequestCommand;
 using Application.Commands.DeleteFriendCommand;
 using Application.Commands.LoginCommand;
 using Application.Commands.RegisterCommand;
+using Application.Commands.UpdateAvatarCommand;
 using Application.Commands.UpdateFriendRequestCommand;
 using Application.Commands.UpdateUserCommand;
 using Application.Queries.GetAllFriendRequestsOfUserQuery;
 using Application.Queries.GetAllFriendsOfUserQuery;
 using Application.Queries.GetAllUsersQuery;
+using Application.Queries.GetAvatarByIdQuery;
 using Application.Queries.GetFriendOfUserQuery;
 using Application.Queries.GetFriendRequestByIdQuery;
 using Application.Queries.GetFriendRequestOfUserQuery;
@@ -333,9 +335,9 @@ namespace WebPresentation.Controllers
         }
 
         [HttpPut]
-        [Route("{id}/{displayName}")]
+        [Route("{id}/name/{displayName}")]
         [Authorize]
-        public async Task<IActionResult> UpdateUser(int id, string displayName)
+        public async Task<IActionResult> UpdateUserDisplayName(int id, string displayName)
         {
             _logger.LogInformation("Creating update display name command... ");
             var command = new UpdateUserDisplayNameCommand
@@ -348,6 +350,46 @@ namespace WebPresentation.Controllers
             await _mediator.Send(command);
 
             return NoContent();
+        }
+
+        [HttpPut]
+        [Route("{id}/avatar/{imagePath}")]
+        public async Task<IActionResult> UpdateAvatar(int id, string imagePath)
+        {
+            _logger.LogInformation("Creating update avatar command... ");
+            var command = new UpdateAvatarCommand
+            {
+                IdUser = id,
+                ImagePath = imagePath,
+            };
+
+            _logger.LogInformation("Calling update avatar command using mediator... ");
+            var response = await _mediator.Send(command);
+
+            if (response == "Avatar created succesfully.")
+                return Ok(response);
+            else
+                return BadRequest(response);
+        }
+
+        [HttpGet]
+        [Route("{id}/avatar")]
+        //[Authorize]
+        public async Task<IActionResult> GetAvatarById(int id)
+        {
+            _logger.LogInformation("Creating get avatar by id query... ");
+            var query = new GetAvatarByIdQuery { IdUser = id };
+
+            _logger.LogInformation("Calling get avatar by id query using mediator... ");
+            var result = await _mediator.Send(query);
+
+            if (result == null)
+            {
+                _logger.LogInformation($"Avatar for user with the id = {id} not found.");
+                return NotFound();
+            }
+
+            return Ok(result);
         }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using Application;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Domain;
 using Domain.Exceptions;
 using Microsoft.AspNetCore.Identity;
@@ -285,7 +287,7 @@ namespace Infrastructure
             return user;
         }
 
-        public async Task<User> UpdateDisplayName(int idUser, string newDisplayName)
+        public async Task<User> UpdateDisplayNameAsync(int idUser, string newDisplayName)
         {
             var user = await _userManager.FindByIdAsync(idUser.ToString());
 
@@ -296,6 +298,95 @@ namespace Infrastructure
                 await _userManager.UpdateAsync(user);
 
                 return user;
+            }
+            else
+                throw new UserNotFoundException(idUser);
+        }
+
+
+        public async Task<string> GetAvatarByIdAsync(int idUser)
+        {
+            var user = await _userManager.FindByIdAsync(idUser.ToString());
+
+            if (user != null)
+            {
+                BlobServiceClient blobServiceClient = new BlobServiceClient("DefaultEndpointsProtocol=https;AccountName=chatappavatars;AccountKey=hSy73Zgw4INK05doJOIT9/foikmfkb9rvG4EYCsCsT0pWmc3gXYmc/H2YJyq5bbLDQ1cO7gM9bSs+AStwVLszQ==;EndpointSuffix=core.windows.net");
+
+                BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient("avatarcontainer");
+
+                // temporarily create a local copy with the desired name
+                var imageName = idUser + ".jpeg";
+                BlobClient blobClient = containerClient.GetBlobClient(imageName);
+
+
+                try
+                {
+                    using FileStream fileStream = File.OpenWrite("D:\\internship\\repo\\internship-project\\ConsoleChatApp\\WebPresentation\\WebPresentation.csproj");
+                    await blobClient.DownloadToAsync(fileStream);
+
+                    var fileName = fileStream.Name;
+
+                    fileStream.Close();
+
+                    return fileName;
+
+                }
+                catch (DirectoryNotFoundException ex)
+                {
+                    // Let the user know that the directory does not exist
+                    Console.WriteLine($"Directory not found: {ex.Message}");
+
+                    return "Directory not found";
+                }
+            }
+            else
+                throw new UserNotFoundException(idUser);
+        }
+
+        public async Task<string> UpdateAvatarAsync(int idUser, string imagePath)
+        {
+            var ImageExtensions = new List<string> { ".jpg", ".jpeg", ".png", ".bmp", ".gif" };
+            var user = await _userManager.FindByIdAsync(idUser.ToString());
+
+            if (user != null)
+            {
+                BlobServiceClient blobServiceClient = new BlobServiceClient("DefaultEndpointsProtocol=https;AccountName=chatappavatars;AccountKey=hSy73Zgw4INK05doJOIT9/foikmfkb9rvG4EYCsCsT0pWmc3gXYmc/H2YJyq5bbLDQ1cO7gM9bSs+AStwVLszQ==;EndpointSuffix=core.windows.net");
+
+                BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient("avatarcontainer");
+
+                // temporarily create a local copy with the desired name
+                var extension = Path.GetExtension(imagePath);
+
+                if (ImageExtensions.Contains(extension))
+                {
+                    extension = ".jpeg";
+                    var copyImage = idUser + extension;
+                    if (File.Exists(copyImage))
+                        File.Delete(copyImage);
+
+                    File.Copy(imagePath, copyImage);
+
+                    // Console.WriteLine("Uploading to Blob storage as blob:\n\t {0}\n", blobServiceClient.Uri);
+                    BlobClient blobClient = containerClient.GetBlobClient(copyImage);
+
+                    if (await blobClient.ExistsAsync())
+                    {
+                        await blobClient.DeleteAsync();
+
+                        blobClient = containerClient.GetBlobClient(copyImage);
+                        // upload to blob storage
+                        using FileStream uploadFileStream = File.OpenRead(copyImage);
+                        await blobClient.UploadAsync(uploadFileStream);
+                        uploadFileStream.Close();
+
+                    }
+
+                    // delete local copy
+                    File.Delete(copyImage);
+
+                    return "Avatar updated succesfully.";
+                }
+                return "Uploaded file is not an image.";
             }
             else
                 throw new UserNotFoundException(idUser);

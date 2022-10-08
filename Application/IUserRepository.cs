@@ -23,6 +23,9 @@ namespace Application
         Task<FriendRequests> GetFriendRequestOfUserAsync(int idUser, int idRequester);
         Task<FriendRequests> GetFriendRequestByIdAsync(int id);
         Task<User> GetUserByIdAsync(int idUser);
-        Task<User> UpdateDisplayName(int idUser, string newDisplayName);
+        Task<User> UpdateDisplayNameAsync(int idUser, string newDisplayName);
+        Task<string> GetAvatarByIdAsync(int idUser);
+        Task<string> UpdateAvatarAsync(int idUser, string imagePath);
+
     }
 }

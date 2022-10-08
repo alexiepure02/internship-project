@@ -19,7 +19,7 @@ namespace Application.Commands.UpdateUserCommand
 
         public async Task<User> Handle(UpdateUserDisplayNameCommand info, CancellationToken cancellationToken)
         {
-            var user = await _unitOfWork.UserRepository.UpdateDisplayName(info.IdUser, info.NewDisplayName);
+            var user = await _unitOfWork.UserRepository.UpdateDisplayNameAsync(info.IdUser, info.NewDisplayName);
 
             if (user == null)
             {
