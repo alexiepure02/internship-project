@@ -1,6 +1,7 @@
 ﻿using Domain;
 using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,20 +10,22 @@ namespace Application
 {
     public interface IUserRepository
     {
-        void AddUsers(List<User> users);
-        void AddUser(User user);
-        void RemoveUser(User user);
-        // this is find user function
-        List<string> GetAllDisplayNames();
-        List<int> GetAllIds();
-        User GetUserByUsernameAndPassword(string username, string password);
-        User GetUserById(int id);
-        void UpdateFriendRequest(User loggedUser, int idFriend, bool accepted);
-        void ValidateIdFriend(User loggedUser, int idFriend);
-        bool CheckIfFriendRequestExists(User loggedUser, User futureFriend);
-        void SendFriendRequest(User loggedUser, int idFriend);
-        void RemoveFriend(User loggedUser, int idFriend);
-        int GetUsersCount();
-        List<User> GetUsers();
+        Task<JwtSecurityToken> LoginAsync(string userName, string password);
+        Task<string> RegisterAsync(string userName, string password, string displayName);
+        Task<string> AddToRoleAsync(string userName, string roleName);
+        Task CreateFriendRequestAsync(FriendRequests friendRequest);
+        Task UpdateFriendRequestAsync(FriendRequests friendRequest, bool accepted);
+        Task<bool> DeleteFriendAsync(Friends friend);
+        Task<List<User>> GetAllFriendsOfUserAsync(int idUser);
+        Task<List<User>> GetAllFriendRequestsOfUserAsync(int idUser);
+        Task<List<User>> GetAllUsersAsync();
+        Task<Friends> GetFriendOfUserAsync(int idUser, int idFriend);
+        Task<FriendRequests> GetFriendRequestOfUserAsync(int idUser, int idRequester);
+        Task<FriendRequests> GetFriendRequestByIdAsync(int id);
+        Task<User> GetUserByIdAsync(int idUser);
+        Task<User> UpdateDisplayNameAsync(int idUser, string newDisplayName);
+        Task<string> GetAvatarByIdAsync(int idUser);
+        Task<string> UpdateAvatarAsync(int idUser, string imagePath);
+
     }
 }
