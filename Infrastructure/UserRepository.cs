@@ -47,6 +47,9 @@ namespace Infrastructure
                     new Claim("name", user.DisplayName)
                 };
 
+                if (user.AvatarUri != null)
+                    authClaims.Add(new Claim("avatarUri", user.AvatarUri));
+
                 foreach (var userRole in userRoles)
                 {
                     authClaims.Add(new Claim(ClaimTypes.Role, userRole));
@@ -319,24 +322,12 @@ namespace Infrastructure
                 BlobClient blobClient = containerClient.GetBlobClient(imageName);
 
 
-                try
+                using (var stream = await blobClient.OpenReadAsync())
                 {
-                    using FileStream fileStream = File.OpenWrite("D:\\internship\\repo\\internship-project\\ConsoleChatApp\\WebPresentation\\WebPresentation.csproj");
-                    await blobClient.DownloadToAsync(fileStream);
+                    FileStream fileStream = File.OpenWrite("D:\\internship\\repo\\internship-project\\ConsoleChatApp\\WebPresentation\\images\\" + idUser + ".jpeg");
+                    await stream.CopyToAsync(fileStream);
 
-                    var fileName = fileStream.Name;
-
-                    fileStream.Close();
-
-                    return fileName;
-
-                }
-                catch (DirectoryNotFoundException ex)
-                {
-                    // Let the user know that the directory does not exist
-                    Console.WriteLine($"Directory not found: {ex.Message}");
-
-                    return "Directory not found";
+                    return "it works.";
                 }
             }
             else
@@ -345,7 +336,7 @@ namespace Infrastructure
 
         public async Task<string> UpdateAvatarAsync(int idUser, string imagePath)
         {
-            var ImageExtensions = new List<string> { ".jpg", ".jpeg", ".png", ".bmp", ".gif" };
+            var ImageExtensions = new List<string> { ".jpg", ".jpeg", ".png", ".bmp", ".gif", ".tmp" };
             var user = await _userManager.FindByIdAsync(idUser.ToString());
 
             if (user != null)
@@ -355,16 +346,18 @@ namespace Infrastructure
                 BlobContainerClient containerClient = blobServiceClient.GetBlobContainerClient("avatarcontainer");
 
                 // temporarily create a local copy with the desired name
+                var path = Path.GetDirectoryName(imagePath);
                 var extension = Path.GetExtension(imagePath);
 
                 if (ImageExtensions.Contains(extension))
                 {
-                    extension = ".jpeg";
-                    var copyImage = idUser + extension;
-                    if (File.Exists(copyImage))
-                        File.Delete(copyImage);
+                    var copyImage = idUser + ".jpeg";
+                    var copyImagePath = path + "\\" + copyImage;
 
-                    File.Copy(imagePath, copyImage);
+                    if (File.Exists(copyImagePath))
+                        File.Delete(copyImagePath);
+
+                    File.Copy(imagePath, copyImagePath);
 
                     // Console.WriteLine("Uploading to Blob storage as blob:\n\t {0}\n", blobServiceClient.Uri);
                     BlobClient blobClient = containerClient.GetBlobClient(copyImage);
@@ -374,17 +367,22 @@ namespace Infrastructure
                         await blobClient.DeleteAsync();
 
                         blobClient = containerClient.GetBlobClient(copyImage);
-                        // upload to blob storage
-                        using FileStream uploadFileStream = File.OpenRead(copyImage);
-                        await blobClient.UploadAsync(uploadFileStream);
-                        uploadFileStream.Close();
-
                     }
+                    // upload to blob storage
+                    using FileStream uploadFileStream = File.OpenRead(copyImagePath);
+                    var response = await blobClient.UploadAsync(uploadFileStream);
+                    uploadFileStream.Close();
 
                     // delete local copy
-                    File.Delete(copyImage);
+                    File.Delete(copyImagePath);
 
-                    return "Avatar updated succesfully.";
+                    var uri = blobClient.Uri.ToString();
+
+                    // add to db
+                    user.AvatarUri = uri;
+                    await _userManager.UpdateAsync(user);
+
+                    return uri;
                 }
                 return "Uploaded file is not an image.";
             }

@@ -15,7 +15,7 @@ using WebPresentation.SignalR;
 
 namespace WebPresentation.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [EnableCors("ClientPermission")]
     [Route("api/messages")]
     [ApiController]

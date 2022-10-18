@@ -91,9 +91,7 @@ namespace Infrastructure
         {
             var messages = await _context.Messages
                 .Where(m => m.IDSender == idUser1 && m.IDReceiver == idUser2 ||
-                m.IDSender == idUser2 && m.IDReceiver == idUser1).OrderByDescending(m => m.DateTime).Skip(offset).Take(numberOfMessages).ToListAsync();
-
-            messages.Sort((x, y) => DateTime.Compare(Convert.ToDateTime(x.DateTime), Convert.ToDateTime(y.DateTime)));
+                m.IDSender == idUser2 && m.IDReceiver == idUser1).OrderByDescending(m => m.ID).Skip(offset).Take(numberOfMessages).OrderBy(m => m.ID).ToListAsync();
 
             if (messages == null)
             {

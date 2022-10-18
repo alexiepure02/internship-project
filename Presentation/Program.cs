@@ -1,12 +1,10 @@
-﻿/*using Application;
+﻿using Application;
 using Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using MediatR;
 using Domain.Exceptions;
 using Domain;
-using Application.Queries.GetUserByAccountQuery;
 using Application.Queries.GetAllUsersQuery;
-using Application.Commands.CreateUserCommand;
 using Application.Queries.GetUserByIdQuery;
 using Application.Commands.UpdateFriendRequestCommand;
 using Application.Commands.CreateFriendRequestCommand;
@@ -22,7 +20,13 @@ namespace Presentation
 {
     public class Program
     {
-
+        static void Main(string[] args)
+        {
+            Console.WriteLine("Hello World.");
+        }
+    }
+}
+/*
         private static IMediator Init()
         {
             var services = new ServiceCollection()

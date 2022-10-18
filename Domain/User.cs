@@ -8,6 +8,7 @@ namespace Domain
     public class User : IdentityUser<int>
     {
         public string DisplayName { get; set; }
+        public string AvatarUri { get; set; }
         public ICollection<Message> Messages { get; set; }
         public virtual ICollection<Friends> MainUserFriends { get; set; }
         public virtual IList<Friends> Friends { get; set; }

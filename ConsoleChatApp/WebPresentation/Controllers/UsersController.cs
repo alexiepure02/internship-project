@@ -19,6 +19,7 @@ using Domain;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -347,34 +348,52 @@ namespace WebPresentation.Controllers
             };
 
             _logger.LogInformation("Calling update display name command using mediator... ");
-            await _mediator.Send(command);
+            var response = await _mediator.Send(command);
 
-            return NoContent();
+            return Ok(response);
         }
 
         [HttpPut]
-        [Route("{id}/avatar/{imagePath}")]
-        public async Task<IActionResult> UpdateAvatar(int id, string imagePath)
+        [Route("{id}/avatar")]
+        [Authorize]
+        public async Task<IActionResult> UpdateAvatar(int id, List<IFormFile> newAvatar)
         {
-            _logger.LogInformation("Creating update avatar command... ");
+
+            //_logger.LogInformation("Creating update avatar command... ");
+            //var command = new UpdateAvatarCommand
+            //{
+            //    IdUser = id,
+            //    ImagePath = imagePath,
+            //};
+
+            //_logger.LogInformation("Calling update avatar command using mediator... ");
+            //var response = await _mediator.Send(command);
+
+            //if (response == "Avatar created succesfully.")
+            //    return Ok(response);
+            //else
+            //    return BadRequest(response);
+            var filePath = Path.GetTempFileName();
+
+            using (var stream = System.IO.File.Create(filePath))
+            {
+                // create tmp file
+                await newAvatar[0].CopyToAsync(stream);
+            }
             var command = new UpdateAvatarCommand
             {
                 IdUser = id,
-                ImagePath = imagePath,
+                ImagePath = filePath,
             };
-
-            _logger.LogInformation("Calling update avatar command using mediator... ");
             var response = await _mediator.Send(command);
 
-            if (response == "Avatar created succesfully.")
-                return Ok(response);
-            else
-                return BadRequest(response);
+            return Ok(response);
+
         }
 
         [HttpGet]
         [Route("{id}/avatar")]
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> GetAvatarById(int id)
         {
             _logger.LogInformation("Creating get avatar by id query... ");
